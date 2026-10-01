@@ -87,18 +87,18 @@ export default function Sidebar({ isOpen, onClose }) {
         fixed lg:static top-0 left-0 z-50 h-screen w-[260px] bg-white border-r border-line flex flex-col shrink-0 transition-transform duration-200
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
-        {/* Brand Header */}
-        <div className="h-[72px] flex items-center justify-between px-5 border-b border-line">
-          <Link to="/" className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-btn bg-primary flex items-center justify-center shrink-0">
-              <GraduationCap className="w-5 h-5 text-white" />
-            </div>
-            <div className="min-w-0">
-              <span className="font-bold text-sm text-ink block truncate tracking-tight">Green Valley Intl.</span>
-              <span className="text-[10px] text-muted block -mt-1 font-medium">Academic 2026–27</span>
-            </div>
-          </Link>
-        </div>
+      {/* Brand Header */}
+<div className="h-[72px] flex items-center justify-between px-5 border-b border-line">
+  <Link to="/" className="flex items-center gap-2.5 min-w-0">
+    <div className="w-9 h-9 rounded-btn bg-primary flex items-center justify-center shrink-0">
+      <GraduationCap className="w-5 h-5 text-white" />
+    </div>
+    <div className="min-w-0">
+      <span className="font-bold text-base text-ink block truncate tracking-tight">EduAdmin</span>
+      <span className="text-[10px] text-muted block -mt-1 font-medium">School Management</span>
+    </div>
+  </Link>
+</div>
 
         {/* Navigation Links */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-4">
