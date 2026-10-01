@@ -10,6 +10,11 @@ import Subjects from './pages/Subjects';
 import Exams from './pages/Exams';
 import Results from './pages/Results';
 import Teachers from './pages/Teachers';
+import Fees from './pages/Fees';
+import Notices from './pages/Notices';
+import Events from './pages/Events';
+import Messages from './pages/Messages';
+import Reports from './pages/Reports';
 
 export default function App() {
   return (
@@ -25,13 +30,13 @@ export default function App() {
             <Route path="exams" element={<Exams />} />
             <Route path="results" element={<Results />} />
             <Route path="teachers" element={<Teachers />} />
-            <Route path="fees" element={<div className="p-6 bg-white rounded-card">Fees Page Placeholder</div>} />
-            <Route path="notices" element={<div className="p-6 bg-white rounded-card">Notices Page Placeholder</div>} />
-            <Route path="events" element={<div className="p-6 bg-white rounded-card">Events Page Placeholder</div>} />
-            <Route path="messages" element={<div className="p-6 bg-white rounded-card">Messages Page Placeholder</div>} />
-            <Route path="reports" element={<div className="p-6 bg-white rounded-card">Reports Page Placeholder</div>} />
-            <Route path="settings" element={<div className="p-6 bg-white rounded-card">Settings Page Placeholder</div>} />
-            <Route path="help" element={<div className="p-6 bg-white rounded-card">Help Page Placeholder</div>} />
+            <Route path="fees" element={<Fees />} />
+            <Route path="notices" element={<Notices />} />
+            <Route path="events" element={<Events />} />
+            <Route path="messages" element={<Messages />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="settings" element={<div className="p-6 bg-white rounded-card">EduAdmin School Settings</div>} />
+            <Route path="help" element={<div className="p-6 bg-white rounded-card">EduAdmin Documentation & Help</div>} />
           </Route>
         </Routes>
       </BrowserRouter>
