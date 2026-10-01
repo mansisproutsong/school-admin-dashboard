@@ -3,6 +3,12 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { FilterProvider } from './context/FilterContext';
 import AdminLayout from './layouts/AdminLayout';
 import Dashboard from './pages/Dashboard';
+import Students from './pages/Students';
+import Classes from './pages/Classes';
+import Attendance from './pages/Attendance';
+import Subjects from './pages/Subjects';
+import Exams from './pages/Exams';
+import Results from './pages/Results';
 
 export default function App() {
   return (
@@ -11,12 +17,12 @@ export default function App() {
         <Routes>
           <Route path="/" element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
-            <Route path="students" element={<div className="p-6 bg-white rounded-card">Students Page Placeholder</div>} />
-            <Route path="classes" element={<div className="p-6 bg-white rounded-card">Classes Page Placeholder</div>} />
-            <Route path="attendance" element={<div className="p-6 bg-white rounded-card">Attendance Page Placeholder</div>} />
-            <Route path="subjects" element={<div className="p-6 bg-white rounded-card">Subjects Page Placeholder</div>} />
-            <Route path="exams" element={<div className="p-6 bg-white rounded-card">Exams Page Placeholder</div>} />
-            <Route path="results" element={<div className="p-6 bg-white rounded-card">Results Page Placeholder</div>} />
+            <Route path="students" element={<Students />} />
+            <Route path="classes" element={<Classes />} />
+            <Route path="attendance" element={<Attendance />} />
+            <Route path="subjects" element={<Subjects />} />
+            <Route path="exams" element={<Exams />} />
+            <Route path="results" element={<Results />} />
             <Route path="teachers" element={<div className="p-6 bg-white rounded-card">Teachers Page Placeholder</div>} />
             <Route path="fees" element={<div className="p-6 bg-white rounded-card">Fees Page Placeholder</div>} />
             <Route path="notices" element={<div className="p-6 bg-white rounded-card">Notices Page Placeholder</div>} />
