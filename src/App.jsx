@@ -9,6 +9,7 @@ import Attendance from './pages/Attendance';
 import Subjects from './pages/Subjects';
 import Exams from './pages/Exams';
 import Results from './pages/Results';
+import Teachers from './pages/Teachers';
 
 export default function App() {
   return (
@@ -23,7 +24,7 @@ export default function App() {
             <Route path="subjects" element={<Subjects />} />
             <Route path="exams" element={<Exams />} />
             <Route path="results" element={<Results />} />
-            <Route path="teachers" element={<div className="p-6 bg-white rounded-card">Teachers Page Placeholder</div>} />
+            <Route path="teachers" element={<Teachers />} />
             <Route path="fees" element={<div className="p-6 bg-white rounded-card">Fees Page Placeholder</div>} />
             <Route path="notices" element={<div className="p-6 bg-white rounded-card">Notices Page Placeholder</div>} />
             <Route path="events" element={<div className="p-6 bg-white rounded-card">Events Page Placeholder</div>} />
