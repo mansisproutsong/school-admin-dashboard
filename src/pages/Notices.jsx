@@ -21,14 +21,10 @@ export default function Notices() {
     setNewNotice({ title: '', category: 'General', priority: 'Medium', targetClass: selectedClassId });
   };
 
-  const filteredNotices = notices.filter(n => {
-    if (selectedClassId === 'ALL') return true;
-    return n.targetClass === 'ALL' || n.targetClass === selectedClassId;
-  });
+  const filteredNotices = notices;
 
   return (
     <div className="space-y-6">
-      <ClassSelector />
       
       <div className="flex justify-between items-center">
         <div>

@@ -12,15 +12,7 @@ export default function Attendance() {
   const { isOverall, scopeText, kpis, students } = getFilteredData();
   const [period, setPeriod] = useState('Week');
 
-  // Recharts Mock Trend Data
-  const trendData = [
-    { day: 'Mon', Present: 94, Absent: 6, Late: 2 },
-    { day: 'Tue', Present: 92, Absent: 8, Late: 3 },
-    { day: 'Wed', Present: 96, Absent: 4, Late: 1 },
-    { day: 'Thu', Present: 91, Absent: 9, Late: 4 },
-    { day: 'Fri', Present: 95, Absent: 5, Late: 2 },
-    { day: 'Sat', Present: 89, Absent: 11, Late: 5 },
-  ];
+  const trendData = getFilteredData().attendanceChartData;
 
   const classComparisonData = [
     { name: '10-A', Attendance: 95 },

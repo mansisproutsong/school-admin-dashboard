@@ -14,13 +14,11 @@ export default function Teachers() {
     const matchesSearch = t.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           t.department.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDept = deptFilter === 'ALL' || t.department === deptFilter;
-    const matchesClass = selectedClassId === 'ALL' || t.classes.includes(selectedClassId);
-    return matchesSearch && matchesDept && matchesClass;
+    return matchesSearch && matchesDept;
   });
 
   return (
     <div className="space-y-6">
-      <ClassSelector />
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

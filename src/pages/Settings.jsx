@@ -211,6 +211,39 @@ export default function Settings() {
                 />
               </div>
             </div>
+
+            <h3 className="font-bold text-sm text-ink border-b border-line pb-2 pt-4">Class-wise Academic Fee Setting</h3>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <div>
+                <label className="font-semibold text-muted">Class 8</label>
+                <input type="number" defaultValue={14000} className="w-full mt-1 p-2.5 border border-line rounded-inp" />
+              </div>
+              <div>
+                <label className="font-semibold text-muted">Class 9</label>
+                <input type="number" defaultValue={16000} className="w-full mt-1 p-2.5 border border-line rounded-inp" />
+              </div>
+              <div>
+                <label className="font-semibold text-muted">Class 10</label>
+                <input type="number" defaultValue={18500} className="w-full mt-1 p-2.5 border border-line rounded-inp" />
+              </div>
+              <div>
+                <label className="font-semibold text-muted">Class 11 Science</label>
+                <input type="number" defaultValue={22000} className="w-full mt-1 p-2.5 border border-line rounded-inp" />
+              </div>
+              <div>
+                <label className="font-semibold text-muted">Class 11 Commerce</label>
+                <input type="number" defaultValue={20000} className="w-full mt-1 p-2.5 border border-line rounded-inp" />
+              </div>
+              <div>
+                <label className="font-semibold text-muted">Class 12 Science</label>
+                <input type="number" defaultValue={24000} className="w-full mt-1 p-2.5 border border-line rounded-inp" />
+              </div>
+              <div>
+                <label className="font-semibold text-muted">Class 12 Commerce</label>
+                <input type="number" defaultValue={22000} className="w-full mt-1 p-2.5 border border-line rounded-inp" />
+              </div>
+            </div>
           </div>
         )}
 

@@ -138,7 +138,7 @@ export default function Students() {
                       <span>{student.name}</span>
                     </td>
                     <td className="py-3.5 px-3 font-medium text-muted">Class {student.classId}</td>
-                    <td className="py-3.5 px-3 font-medium text-muted">#{student.rollNo}</td>
+                    <td className="py-3.5 px-3 font-medium text-muted">{student.rollNo}</td>
                     <td className="py-3.5 px-3 font-semibold text-ink">
                       <span className={`px-2 py-0.5 rounded-full ${student.attendancePct < 75 ? 'bg-danger/10 text-danger font-bold' : 'text-ink'}`}>
                         {student.attendancePct}%

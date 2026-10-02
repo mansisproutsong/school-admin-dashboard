@@ -24,7 +24,7 @@ export default function StudentDrawer({ student, onClose }) {
               </div>
               <div>
                 <h2 className="text-base font-bold text-ink">{student.name}</h2>
-                <p className="text-xs text-muted">Class {student.classId} • Roll #{student.rollNo}</p>
+                <p className="text-xs text-muted">Class {student.classId} • Roll No: {student.rollNo}</p>
               </div>
             </div>
             <button onClick={onClose} className="p-1.5 text-muted hover:text-ink rounded-btn hover:bg-slate-200">

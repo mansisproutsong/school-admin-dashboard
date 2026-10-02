@@ -148,7 +148,7 @@ export function FilterProvider({ children }) {
         academicAvg: `${cls.avgScore}%`,
         academicGrowth: `Class Average`
       },
-      students: filteredStudents.length ? filteredStudents : students.slice(0, 3),
+      students: filteredStudents,
       classDetails: cls,
       attendanceChartData: [
         { day: 'Mon', Present: Math.min(count, presentCount - classOffset), Absent: Math.max(0, absentCount + classOffset) },

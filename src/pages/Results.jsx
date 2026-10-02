@@ -90,7 +90,7 @@ export default function Results() {
               <div key={s.id} className="p-3 bg-slate-50 rounded-btn border border-line flex justify-between items-center">
                 <div>
                   <p className="text-xs font-bold text-ink">{s.name}</p>
-                  <p className="text-[11px] text-muted">Class {s.classId} • Roll #{s.rollNo}</p>
+                  <p className="text-[11px] text-muted">Class {s.classId} • Roll No: {s.rollNo}</p>
                 </div>
                 <span className="text-xs font-bold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-full">{s.performanceAvg}%</span>
               </div>
@@ -111,7 +111,7 @@ export default function Results() {
                 <div key={s.id} className="p-3 bg-red-50/50 rounded-btn border border-red-200 flex justify-between items-center">
                   <div>
                     <p className="text-xs font-bold text-red-900">{s.name}</p>
-                    <p className="text-[11px] text-muted">Class {s.classId} • Roll #{s.rollNo}</p>
+                    <p className="text-[11px] text-muted">Class {s.classId} • Roll No: {s.rollNo}</p>
                   </div>
                   <span className="text-xs font-bold text-danger bg-white border border-red-200 px-2.5 py-1 rounded-full">{s.performanceAvg}%</span>
                 </div>

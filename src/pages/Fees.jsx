@@ -5,8 +5,8 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGri
 import { Wallet, AlertCircle, CheckCircle, Clock, Plus, Filter, Search, X } from 'lucide-react';
 
 export default function Fees() {
-  const { getFilteredData, selectedClassId, recordPayment, students } = useFilter();
-  const { isOverall, scopeText, kpis, feeMonthlyData } = getFilteredData();
+  const { getFilteredData, selectedClassId, recordPayment } = useFilter();
+  const { isOverall, scopeText, kpis, feeMonthlyData, students } = getFilteredData();
 
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
