@@ -13,13 +13,33 @@ const classesList = [
   { id: '12-Commerce', standard: '12', section: 'Commerce', teacher: 'Mr. Rajesh Shah', room: 'Room 402', capacity: 40, studentCount: 34, feeAmount: 20000 },
 ];
 
+const firstNames = [
+  'Aarav', 'Ananya', 'Vihaan', 'Diya', 'Ishaan', 'Myra', 'Kian', 'Anaya', 'Rohan', 'Priya',
+  'Aditi', 'Devansh', 'Saisha', 'Siddharth', 'Tara', 'Kabir', 'Riya', 'Arjun', 'Avani', 'Aditya',
+  'Kavya', 'Dhruv', 'Sneha', 'Yash', 'Tanvi', 'Nikhil', 'Bhavya', 'Pranav', 'Isha', 'Harsh',
+  'Meera', 'Reyansh', 'Shreya', 'Ahaan', 'Nisha', 'Manav', 'Pooja', 'Ketan', 'Simran', 'Rahul',
+  'Neha', 'Vikram', 'Anushka', 'Akash', 'Zoya', 'Farhan', 'Riddhi', 'Samarth', 'Navya', 'Gaurav',
+  'Bhoomika', 'Chirag', 'Deepak', 'Esha', 'Gautam', 'Hetal', 'Inder', 'Jhanvi', 'Kiran', 'Lata',
+  'Madhav', 'Nayana', 'Omkar', 'Parul', 'Quadir', 'Rachana', 'Sagar', 'Trisha', 'Umesh', 'Vandana'
+];
+
+const lastNames = [
+  'Sharma', 'Patel', 'Gupta', 'Mehta', 'Verma', 'Singh', 'Joshi', 'Iyer', 'Rao', 'Shah',
+  'Nair', 'Bhatia', 'Kapoor', 'Sen', 'Reddy', 'Chawla', 'Trivedi', 'Pandey', 'Deshmukh', 'Agarwal',
+  'Mishra', 'Bose', 'Kulkarni', 'Saxena', 'Choudhury', 'Gokhale', 'Mukherjee', 'Thakur', 'Jain', 'Malhotra'
+];
+
+const parentFirstNames = [
+  'Rajesh', 'Suresh', 'Alok', 'Ramesh', 'Vijay', 'Sunil', 'Manish', 'Anil', 'Sanjay', 'Pankaj',
+  'Deepak', 'Mukesh', 'Rajiv', 'Arun', 'Vinod', 'Mahesh', 'Ashok', 'Dinesh', 'Kishore', 'Praveen'
+];
+
 let globalStudentId = 1;
 const studentsData = [];
 
 classesList.forEach((cls) => {
   for (let i = 1; i <= cls.studentCount; i++) {
     // Generate realistic attendance (70 - 100)
-    // For a few, make it below 75 for alerts
     const isAtRiskAttendance = Math.random() > 0.9;
     const attendancePct = isAtRiskAttendance ? Math.floor(Math.random() * 15) + 60 : Math.floor(Math.random() * 26) + 75;
     
@@ -36,9 +56,17 @@ classesList.forEach((cls) => {
     // Status
     const status = Math.random() > 0.08 ? 'Present' : 'Absent';
 
+    // Generate unique name
+    const fname = firstNames[(globalStudentId - 1) % firstNames.length];
+    const lname = lastNames[(Math.floor((globalStudentId - 1) / firstNames.length) + (globalStudentId * 3)) % lastNames.length];
+    const studentName = `${fname} ${lname}`;
+
+    const parentFname = parentFirstNames[(globalStudentId * 7) % parentFirstNames.length];
+    const parentName = `${parentFname} ${lname}`;
+
     studentsData.push({
       id: `S${globalStudentId}`,
-      name: `Student ${globalStudentId}`,
+      name: studentName,
       classId: cls.id,
       section: cls.section,
       rollNo: i.toString().padStart(2, '0'),
@@ -46,7 +74,7 @@ classesList.forEach((cls) => {
       feeStatus,
       feeAmount: cls.feeAmount,
       performanceAvg,
-      parentName: `Parent ${globalStudentId}`,
+      parentName,
       parentPhone: `+91 98765 ${Math.floor(10000 + Math.random() * 90000)}`,
       status,
     });
@@ -54,7 +82,6 @@ classesList.forEach((cls) => {
   }
 });
 
-// Calculate true averages and totals
 const totalStudents = studentsData.length; // 340
 const totalClasses = classesList.length; // 10
 
@@ -78,7 +105,7 @@ export const studentsData = ${JSON.stringify(studentsData, null, 2)};
 export const overallKPIs = {
   totalStudents: "${totalStudents}",
   studentGrowth: "+4.8%",
-  attendancePct: "92.4%", // Will be calculated dynamically
+  attendancePct: "92.4%",
   attendanceBreakdown: "0 Present • 0 Absent",
   feeCollected: "₹0",
   feeExpected: "₹0",
@@ -153,4 +180,4 @@ export const teachersList = [
 `;
 
 fs.writeFileSync('src/data/mockData.js', newMockData);
-console.log('mockData.js updated successfully!');
+console.log('mockData.js updated successfully with realistic student names!');

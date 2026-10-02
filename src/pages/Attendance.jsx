@@ -1,74 +1,128 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useFilter } from '../context/FilterContext';
 import ClassSelector from '../components/common/ClassSelector';
+import StudentDrawer from '../components/common/StudentDrawer';
 import { 
   ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, 
   Tooltip, CartesianGrid, Legend 
 } from 'recharts';
-import { ClipboardCheck, UserX, Clock, AlertTriangle, Calendar, Filter } from 'lucide-react';
+import { 
+  ClipboardCheck, UserX, Clock, AlertTriangle, Calendar, Filter, 
+  Users, UserCheck, Send, CheckCircle2, ChevronRight, Eye, Phone, Bell
+} from 'lucide-react';
+
+const avatarGradients = [
+  'from-blue-600 to-indigo-600 text-white',
+  'from-emerald-500 to-teal-600 text-white',
+  'from-purple-600 to-pink-600 text-white',
+  'from-amber-500 to-orange-600 text-white',
+  'from-cyan-500 to-blue-600 text-white',
+  'from-rose-500 to-red-600 text-white'
+];
+
+const getAvatarGradient = (id) => {
+  const num = parseInt(String(id).replace(/\D/g, '')) || 0;
+  return avatarGradients[num % avatarGradients.length];
+};
+
+const getInitials = (name) => {
+  if (!name) return 'ST';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
+};
 
 export default function Attendance() {
-  const { getFilteredData, selectedClassId } = useFilter();
-  const { isOverall, scopeText, kpis, students } = getFilteredData();
+  const { getFilteredData, selectedClassId, classesList, students: allStudents } = useFilter();
+  const filteredData = getFilteredData();
+  const { isOverall, scopeText, kpis, students } = filteredData;
+  
   const [period, setPeriod] = useState('Week');
   const [viewType, setViewType] = useState('Students');
+  const [selectedStudentForDrawer, setSelectedStudentForDrawer] = useState(null);
+  const [warningNoticeStudent, setWarningNoticeStudent] = useState(null);
+  const [noticeSentToast, setNoticeSentToast] = useState('');
 
-  const trendData = getFilteredData().attendanceChartData;
+  const trendData = filteredData.attendanceChartData;
 
-  const classComparisonData = [
-    { name: '10-A', Attendance: 95 },
-    { name: '10-B', Attendance: 92 },
-    { name: '9-A', Attendance: 88 },
-    { name: '9-B', Attendance: 94 },
-    { name: '8-A', Attendance: 94 },
-    { name: '8-B', Attendance: 91 },
-  ];
+  // Dynamically compute class attendance comparison from live student dataset
+  const classComparisonData = classesList.map(cls => {
+    const clsStudents = allStudents.filter(s => s.classId === cls.id);
+    const avgAtt = clsStudents.length > 0 
+      ? Math.round(clsStudents.reduce((acc, curr) => acc + curr.attendancePct, 0) / clsStudents.length)
+      : 0;
+    return { 
+      name: cls.name, 
+      Attendance: avgAtt,
+      studentsCount: clsStudents.length
+    };
+  });
 
   const teacherAttendanceData = [
-    { name: 'Mr. Ahsan Bukhari', role: 'Mathematics', attendancePct: 98, status: 'Present' },
-    { name: 'Ms. Rabia Sultan', role: 'Physics', attendancePct: 95, status: 'Present' },
-    { name: 'Ms. Sania Yousaf', role: 'English', attendancePct: 88, status: 'Present' },
-    { name: 'Mr. Faisal Karim', role: 'Chemistry', attendancePct: 72, status: 'Absent' },
-    { name: 'Mr. Adeel Nasir', role: 'Computer Science', attendancePct: 99, status: 'Present' }
+    { name: 'Dr. Ramesh Iyer', role: 'Mathematics Lead', attendancePct: 98, status: 'Present', phone: '+91 98401 22334' },
+    { name: 'Mrs. Sunita Sharma', role: 'Physics Dept', attendancePct: 95, status: 'Present', phone: '+91 98112 33445' },
+    { name: 'Mr. Rajesh Varma', role: 'Chemistry Senior', attendancePct: 88, status: 'Present', phone: '+91 98765 43210' },
+    { name: 'Ms. Meenakshi Sundaram', role: 'English Literature', attendancePct: 71, status: 'Absent', phone: '+91 97123 88990' },
+    { name: 'Mr. Vikramaditya Singh', role: 'Computer Science', attendancePct: 99, status: 'Present', phone: '+91 99887 76655' },
+    { name: 'Mrs. Ananya Mukhopadhyay', role: 'Biology Lead', attendancePct: 73, status: 'Present', phone: '+91 98334 55667' }
   ];
 
   const lowAttendanceStudents = students.filter(s => s.attendancePct < 75);
   const lowAttendanceTeachers = teacherAttendanceData.filter(t => t.attendancePct < 75);
 
+  const handleIssueNoticeConfirm = (studentName) => {
+    setWarningNoticeStudent(null);
+    setNoticeSentToast(`Official Attendance Notice issued to parent of ${studentName}`);
+    setTimeout(() => setNoticeSentToast(''), 4000);
+  };
+
   return (
     <div className="space-y-6">
       <ClassSelector />
 
-      {/* Header & Period Filters */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Header & Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
         <div>
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold text-ink">Attendance</h1>
-            <div className="flex items-center bg-slate-100 p-1 rounded-btn text-xs font-semibold">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight">Attendance Analytics</h1>
+            <div className="inline-flex bg-slate-100 p-1 rounded-xl text-xs font-semibold">
               {['Students', 'Teachers'].map(v => (
                 <button 
                   key={v} 
                   onClick={() => setViewType(v)} 
-                  className={`px-3 py-1.5 rounded-md transition-colors ${viewType === v ? 'bg-white shadow-sm text-primary' : 'text-muted hover:text-ink'}`}
+                  className={`px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+                    viewType === v 
+                      ? 'bg-white shadow-xs text-blue-600 font-bold' 
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
                 >
                   {v}
                 </button>
               ))}
             </div>
           </div>
-          <p className="text-xs text-muted mt-1">{scopeText}</p>
+          <p className="text-xs text-slate-500 mt-1">{scopeText}</p>
         </div>
 
-        <div className="flex items-center gap-1 bg-white border border-line p-1 rounded-btn shadow-soft text-xs font-semibold">
-          {['Week', 'Month', 'Term'].map((p) => (
+        <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 p-1.5 rounded-xl text-xs font-semibold shrink-0 overflow-x-auto">
+          {[
+            { label: 'This Week', value: 'Week' },
+            { label: 'This Month', value: 'Month' },
+            { label: 'This Term', value: 'Term' }
+          ].map((item) => (
             <button
-              key={p}
-              onClick={() => setPeriod(p)}
-              className={`px-3 py-1.5 rounded-md transition-colors ${
-                period === p ? 'bg-primary text-white' : 'text-muted hover:bg-slate-100'
+              key={item.value}
+              onClick={() => setPeriod(item.value)}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer whitespace-nowrap ${
+                period === item.value 
+                  ? 'bg-blue-600 text-white font-bold shadow-xs' 
+                  : 'text-slate-600 hover:bg-slate-200/60'
               }`}
             >
-              This {p}
+              {item.label}
             </button>
           ))}
         </div>
@@ -76,37 +130,37 @@ export default function Attendance() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-card border border-line p-5 shadow-soft flex items-center gap-4">
-          <span className="w-12 h-12 rounded-btn bg-success/10 flex items-center justify-center shrink-0">
-            <ClipboardCheck className="w-6 h-6 text-success" />
-          </span>
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-all flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100 flex items-center justify-center shrink-0">
+            <ClipboardCheck className="w-6 h-6" />
+          </div>
           <div>
-            <p className="text-2xl font-bold text-ink">{viewType === 'Students' ? kpis.attendancePct : '94%'}</p>
-            <p className="text-xs text-muted mt-0.5">Average Attendance Rate</p>
+            <p className="text-2xl font-black text-slate-900 tracking-tight">{viewType === 'Students' ? kpis.attendancePct : '94%'}</p>
+            <p className="text-xs font-medium text-slate-500 mt-0.5">Average Attendance Rate</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-card border border-line p-5 shadow-soft flex items-center gap-4">
-          <span className="w-12 h-12 rounded-btn bg-danger/10 flex items-center justify-center shrink-0">
-            <UserX className="w-6 h-6 text-danger" />
-          </span>
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-all flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 ring-1 ring-rose-100 flex items-center justify-center shrink-0">
+            <UserX className="w-6 h-6" />
+          </div>
           <div>
-            <p className="text-2xl font-bold text-ink">
-              {viewType === 'Students' ? (isOverall ? '95 Students' : '2 Students') : '4 Teachers'}
+            <p className="text-2xl font-black text-slate-900 tracking-tight">
+              {viewType === 'Students' ? (isOverall ? `${students.filter(s => s.status === 'Absent').length || 95} Students` : `${students.filter(s => s.status === 'Absent').length} Students`) : '4 Teachers'}
             </p>
-            <p className="text-xs text-muted mt-0.5">Absent Today</p>
+            <p className="text-xs font-medium text-slate-500 mt-0.5">Absent Today</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-card border border-line p-5 shadow-soft flex items-center gap-4">
-          <span className="w-12 h-12 rounded-btn bg-warning/10 flex items-center justify-center shrink-0">
-            <Clock className="w-6 h-6 text-warning" />
-          </span>
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-all flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 ring-1 ring-amber-100 flex items-center justify-center shrink-0">
+            <Clock className="w-6 h-6" />
+          </div>
           <div>
-            <p className="text-2xl font-bold text-ink">
+            <p className="text-2xl font-black text-slate-900 tracking-tight">
               {viewType === 'Students' ? (isOverall ? '26 Students' : '1 Student') : '2 Teachers'}
             </p>
-            <p className="text-xs text-muted mt-0.5">Late Arrivals Today</p>
+            <p className="text-xs font-medium text-slate-500 mt-0.5">Late Arrivals Today</p>
           </div>
         </div>
       </div>
@@ -114,10 +168,15 @@ export default function Attendance() {
       {/* Recharts Analytics Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Trend Area Chart */}
-        <div className="lg:col-span-2 bg-white rounded-card border border-line p-5 shadow-soft space-y-4">
-          <div className="flex items-center justify-between border-b border-line pb-3">
-            <h3 className="font-bold text-sm text-ink">Attendance Trend ({period}ly)</h3>
-            <span className="text-xs text-muted font-medium">Daily Present %</span>
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+              <h3 className="font-bold text-sm text-slate-900">Attendance Trend ({period}ly)</h3>
+              <p className="text-[11px] text-slate-400">Daily average present percentage</p>
+            </div>
+            <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
+              Active Tracking
+            </span>
           </div>
 
           <div className="h-64 w-full text-xs">
@@ -129,32 +188,43 @@ export default function Attendance() {
                     <stop offset="95%" stopColor="#22C55E" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                <XAxis dataKey="day" stroke="#64748B" />
-                <YAxis domain={[70, 100]} stroke="#64748B" />
-                <Tooltip />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                <XAxis dataKey="day" stroke="#64748B" tickLine={false} />
+                <YAxis domain={[70, 100]} stroke="#64748B" tickLine={false} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#0F172A', borderRadius: '12px', border: 'none', color: '#fff', fontSize: '12px' }}
+                  itemStyle={{ color: '#4ADE80' }}
+                />
                 <Legend />
-                <Area type="monotone" dataKey="Present" stroke="#22C55E" fillOpacity={1} fill="url(#colorPresent)" strokeWidth={2} />
+                <Area type="monotone" dataKey="Present" stroke="#22C55E" fillOpacity={1} fill="url(#colorPresent)" strokeWidth={2.5} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Class Comparison Bar Chart */}
-        <div className="bg-white rounded-card border border-line p-5 shadow-soft space-y-4">
-          <div className="flex items-center justify-between border-b border-line pb-3">
-            <h3 className="font-bold text-sm text-ink">Class Comparison</h3>
-            <span className="text-xs text-muted font-medium">Attendance %</span>
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+              <h3 className="font-bold text-sm text-slate-900">Class Comparison</h3>
+              <p className="text-[11px] text-slate-400">Live attendance rate per class</p>
+            </div>
+            <span className="text-xs text-slate-500 font-semibold bg-slate-100 px-2.5 py-1 rounded-full">
+              {classComparisonData.length} Classes
+            </span>
           </div>
 
           <div className="h-64 w-full text-xs">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={classComparisonData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                <XAxis dataKey="name" stroke="#64748B" />
-                <YAxis domain={[60, 100]} stroke="#64748B" />
-                <Tooltip />
-                <Bar dataKey="Attendance" fill="#2563EB" radius={[4, 4, 0, 0]} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                <XAxis dataKey="name" stroke="#64748B" tickLine={false} />
+                <YAxis domain={[60, 100]} stroke="#64748B" tickLine={false} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#0F172A', borderRadius: '12px', border: 'none', color: '#fff', fontSize: '12px' }}
+                  itemStyle={{ color: '#60A5FA' }}
+                />
+                <Bar dataKey="Attendance" fill="#2563EB" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -163,104 +233,163 @@ export default function Attendance() {
 
       {/* Low Attendance Alert Table (<75%) */}
       {viewType === 'Students' ? (
-        <div className="bg-white rounded-card border border-line p-5 shadow-soft space-y-4">
-          <div className="flex items-center justify-between border-b border-line pb-3">
-            <h3 className="font-bold text-sm text-ink flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-danger" /> Low Attendance Alert (&lt;75%)
-            </h3>
-            <span className="text-xs text-danger font-semibold bg-danger/10 px-2.5 py-1 rounded-full">
-              Action Needed
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+                <AlertTriangle className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="font-bold text-sm text-slate-900">Low Attendance Alert (&lt;75%)</h3>
+                <p className="text-[11px] text-slate-500">Students requiring immediate parent outreach</p>
+              </div>
+            </div>
+            <span className="text-xs text-rose-700 font-bold bg-rose-50 border border-rose-200 px-3 py-1 rounded-full">
+              {lowAttendanceStudents.length} Students Flagged
             </span>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead>
-                <tr className="text-muted border-b border-line bg-slate-50 font-bold uppercase text-[10px]">
-                  <th className="py-2.5 px-4">Student Name</th>
-                  <th className="py-2.5 px-3">Class</th>
-                  <th className="py-2.5 px-3">Attendance</th>
-                  <th className="py-2.5 px-3">Parent Contact</th>
-                  <th className="py-2.5 px-4 text-right">Action</th>
+                <tr className="text-slate-400 border-b border-slate-100 bg-slate-50/80 font-bold uppercase text-[10px] tracking-wider">
+                  <th className="py-3 px-4">Student</th>
+                  <th className="py-3 px-3">Class & Roll</th>
+                  <th className="py-3 px-3">Attendance %</th>
+                  <th className="py-3 px-3">Parent Contact</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-line">
+              <tbody className="divide-y divide-slate-100">
                 {lowAttendanceStudents.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="text-center py-6 text-muted">
-                      No students currently below 75% attendance in this scope!
+                    <td colSpan="5" className="text-center py-8 text-slate-400 font-medium">
+                      No students currently below 75% attendance in this scope.
                     </td>
                   </tr>
                 ) : (
-                  lowAttendanceStudents.map((s) => (
-                    <tr key={s.id} className="hover:bg-slate-50">
-                      <td className="py-3 px-4 font-semibold text-ink">{s.name}</td>
-                      <td className="py-3 px-3 text-muted">Class {s.classId}</td>
-                      <td className="py-3 px-3">
-                        <span className="font-bold text-danger bg-danger/10 px-2 py-0.5 rounded-full">
-                          {s.attendancePct}%
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-muted">{s.parentPhone}</td>
-                      <td className="py-3 px-4 text-right">
-                        <button 
-                          onClick={() => alert(`Warning notice issued to parent of ${s.name}`)}
-                          className="text-xs font-semibold text-danger hover:underline"
-                        >
-                          Issue Warning Notice
-                        </button>
-                      </td>
-                    </tr>
-                  ))
+                  lowAttendanceStudents.map((s) => {
+                    const initials = getInitials(s.name);
+                    const gradient = getAvatarGradient(s.id);
+
+                    return (
+                      <tr key={s.id} className="hover:bg-slate-50/80 transition-colors group">
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center font-bold text-xs shrink-0 shadow-xs`}>
+                              {initials}
+                            </div>
+                            <div>
+                              <p className="font-bold text-slate-900 hover:text-blue-600 transition-colors cursor-pointer" onClick={() => setSelectedStudentForDrawer(s)}>
+                                {s.name}
+                              </p>
+                              <p className="text-[11px] text-slate-400">ID: {s.id}</p>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="py-3 px-3">
+                          <span className="font-semibold text-slate-700">Class {s.classId}</span>
+                          <p className="text-[11px] text-slate-400">Roll {s.rollNo}</p>
+                        </td>
+
+                        <td className="py-3 px-3">
+                          <span className="font-black text-rose-600 bg-rose-50 border border-rose-100 px-2.5 py-1 rounded-full inline-flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" />
+                            {s.attendancePct}%
+                          </span>
+                        </td>
+
+                        <td className="py-3 px-3">
+                          <p className="font-medium text-slate-800">{s.parentName || 'Parent / Guardian'}</p>
+                          <p className="text-[11px] text-slate-500 font-mono flex items-center gap-1">
+                            <Phone className="w-3 h-3 text-slate-400" />
+                            {s.parentPhone}
+                          </p>
+                        </td>
+
+                        <td className="py-3 px-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => setSelectedStudentForDrawer(s)}
+                              className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs flex items-center gap-1 transition-colors cursor-pointer shadow-2xs"
+                            >
+                              <Eye className="w-3.5 h-3.5 text-slate-400" />
+                              View
+                            </button>
+                            <button 
+                              onClick={() => setWarningNoticeStudent(s)}
+                              className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-semibold text-xs flex items-center gap-1 transition-colors cursor-pointer"
+                            >
+                              <Send className="w-3.5 h-3.5" />
+                              Issue Notice
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-card border border-line p-5 shadow-soft space-y-4">
-          <div className="flex items-center justify-between border-b border-line pb-3">
-            <h3 className="font-bold text-sm text-ink flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-danger" /> Low Attendance Teachers (&lt;75%)
-            </h3>
-            <span className="text-xs text-danger font-semibold bg-danger/10 px-2.5 py-1 rounded-full">
-              Review Needed
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                <AlertTriangle className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="font-bold text-sm text-slate-900">Low Attendance Teachers (&lt;75%)</h3>
+                <p className="text-[11px] text-slate-500">Faculty attendance review & notifications</p>
+              </div>
+            </div>
+            <span className="text-xs text-amber-700 font-bold bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
+              {lowAttendanceTeachers.length} Faculty Review
             </span>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead>
-                <tr className="text-muted border-b border-line bg-slate-50 font-bold uppercase text-[10px]">
-                  <th className="py-2.5 px-4">Teacher Name</th>
-                  <th className="py-2.5 px-3">Subject / Role</th>
-                  <th className="py-2.5 px-3">Attendance</th>
-                  <th className="py-2.5 px-3">Status</th>
-                  <th className="py-2.5 px-4 text-right">Action</th>
+                <tr className="text-slate-400 border-b border-slate-100 bg-slate-50/80 font-bold uppercase text-[10px] tracking-wider">
+                  <th className="py-3 px-4">Faculty Member</th>
+                  <th className="py-3 px-3">Department</th>
+                  <th className="py-3 px-3">Attendance</th>
+                  <th className="py-3 px-3">Status Today</th>
+                  <th className="py-3 px-4 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-line">
+              <tbody className="divide-y divide-slate-100">
                 {lowAttendanceTeachers.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="text-center py-6 text-muted">
-                      No teachers currently below 75% attendance!
+                    <td colSpan="5" className="text-center py-8 text-slate-400 font-medium">
+                      All teachers maintain attendance above threshold!
                     </td>
                   </tr>
                 ) : (
                   lowAttendanceTeachers.map((t, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50">
-                      <td className="py-3 px-4 font-semibold text-ink">{t.name}</td>
-                      <td className="py-3 px-3 text-muted">{t.role}</td>
+                    <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3 px-4 font-bold text-slate-900">{t.name}</td>
+                      <td className="py-3 px-3 text-slate-600 font-medium">{t.role}</td>
                       <td className="py-3 px-3">
-                        <span className="font-bold text-danger bg-danger/10 px-2 py-0.5 rounded-full">
+                        <span className="font-black text-rose-600 bg-rose-50 border border-rose-100 px-2.5 py-1 rounded-full">
                           {t.attendancePct}%
                         </span>
                       </td>
-                      <td className="py-3 px-3 text-muted">{t.status}</td>
+                      <td className="py-3 px-3">
+                        <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                          t.status === 'Present' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
+                        }`}>
+                          {t.status}
+                        </span>
+                      </td>
                       <td className="py-3 px-4 text-right">
                         <button 
-                          onClick={() => alert(`Reminder sent to ${t.name}`)}
-                          className="text-xs font-semibold text-primary hover:underline"
+                          onClick={() => alert(`Official Attendance Reminder sent to ${t.name}`)}
+                          className="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-semibold text-xs transition-colors cursor-pointer"
                         >
                           Send Reminder
                         </button>
@@ -272,6 +401,80 @@ export default function Attendance() {
             </table>
           </div>
         </div>
+      )}
+
+      {/* Student Drawer Portal */}
+      {selectedStudentForDrawer && (
+        <StudentDrawer 
+          student={selectedStudentForDrawer} 
+          onClose={() => setSelectedStudentForDrawer(null)} 
+        />
+      )}
+
+      {/* Warning Notice Confirmation Modal */}
+      {warningNoticeStudent && createPortal(
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4 animate-scaleUp">
+            <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+              <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+                <Bell className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Issue Official Attendance Notice</h3>
+                <p className="text-xs text-slate-500">Send warning SMS & Email to parent</p>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-200/80 text-xs">
+              <div className="flex justify-between">
+                <span className="text-slate-500">Student Name:</span>
+                <span className="font-bold text-slate-900">{warningNoticeStudent.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Class & Roll:</span>
+                <span className="font-semibold text-slate-800">Class {warningNoticeStudent.classId} • Roll {warningNoticeStudent.rollNo}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Current Attendance:</span>
+                <span className="font-black text-rose-600">{warningNoticeStudent.attendancePct}%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Parent Phone:</span>
+                <span className="font-mono font-semibold text-slate-800">{warningNoticeStudent.parentPhone}</span>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-500">
+              An automated notification will be dispatched to <strong className="text-slate-800">{warningNoticeStudent.parentPhone}</strong> requesting a parent-teacher meeting due to attendance falling below 75%.
+            </p>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                onClick={() => setWarningNoticeStudent(null)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleIssueNoticeConfirm(warningNoticeStudent.name)}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-sm transition-colors cursor-pointer flex items-center gap-1.5"
+              >
+                <Send className="w-3.5 h-3.5" />
+                Send Official Notice
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Toast Notification */}
+      {noticeSentToast && createPortal(
+        <div className="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl text-xs font-semibold flex items-center gap-3 z-50 animate-bounceIn border border-slate-800">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{noticeSentToast}</span>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/layout/Sidebar';
 import Header from '../components/layout/Header';
-import { MessageCircle } from 'lucide-react';
+import Chatbot from '../components/common/Chatbot';
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -20,14 +20,8 @@ export default function AdminLayout() {
         </main>
       </div>
 
-      {/* Chatbot Button */}
-      <button 
-        className="fixed bottom-6 right-6 w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition-all z-50 animate-bounce"
-        title="Need Help?"
-        onClick={() => alert("Chatbot coming soon!")}
-      >
-        <MessageCircle className="w-6 h-6" />
-      </button>
+      {/* Global AI Chatbot */}
+      <Chatbot />
     </div>
   );
 }
