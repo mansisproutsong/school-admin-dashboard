@@ -1,9 +1,9 @@
 import React from 'react';
 import { useFilter } from '../../context/FilterContext';
-import { Filter, Building2, Calendar } from 'lucide-react';
+import { Filter, Building2, Calendar, Clock } from 'lucide-react';
 
 export default function ClassSelector() {
-  const { selectedClassId, setSelectedClassId, classesList } = useFilter();
+  const { selectedClassId, setSelectedClassId, dateRange, setDateRange, classesList } = useFilter();
 
   return (
     <div className="bg-white rounded-card border border-line p-4 shadow-soft flex flex-wrap items-center justify-between gap-4">
@@ -17,24 +17,44 @@ export default function ClassSelector() {
         </span>
       </div>
 
-      {/* Class Dropdown */}
-      <div className="flex items-center gap-2">
-        <label htmlFor="global-class-select" className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
-          <Filter className="w-3.5 h-3.5 text-primary" /> Class Context:
-        </label>
-        <select
-          id="global-class-select"
-          value={selectedClassId}
-          onChange={(e) => setSelectedClassId(e.target.value)}
-          className="bg-bg border border-line text-ink font-semibold text-xs rounded-inp px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/25 cursor-pointer"
-        >
-          <option value="ALL">All Classes (Overall School)</option>
-          {classesList.map((cls) => (
-            <option key={cls.id} value={cls.id}>
-              Class {cls.id} ({cls.studentCount} Students)
-            </option>
-          ))}
-        </select>
+      {/* Controls: Class Selector + Date Range Selector */}
+      <div className="flex flex-wrap items-center gap-3">
+        {/* Date Range Selector */}
+        <div className="flex items-center gap-2">
+          <label htmlFor="date-range-select" className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1">
+            <Clock className="w-3.5 h-3.5 text-primary" /> Range:
+          </label>
+          <select
+            id="date-range-select"
+            value={dateRange}
+            onChange={(e) => setDateRange(e.target.value)}
+            className="bg-bg border border-line text-ink font-semibold text-xs rounded-inp px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/25 cursor-pointer"
+          >
+            <option value="This Week">This Week</option>
+            <option value="This Month">This Month</option>
+            <option value="This Term">This Term</option>
+          </select>
+        </div>
+
+        {/* Class Dropdown */}
+        <div className="flex items-center gap-2">
+          <label htmlFor="global-class-select" className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
+            <Filter className="w-3.5 h-3.5 text-primary" /> Class Context:
+          </label>
+          <select
+            id="global-class-select"
+            value={selectedClassId}
+            onChange={(e) => setSelectedClassId(e.target.value)}
+            className="bg-bg border border-line text-ink font-semibold text-xs rounded-inp px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/25 cursor-pointer"
+          >
+            <option value="ALL">All Classes (Overall School)</option>
+            {classesList.map((cls) => (
+              <option key={cls.id} value={cls.id}>
+                Class {cls.id} ({cls.studentCount} Students)
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
     </div>
   );

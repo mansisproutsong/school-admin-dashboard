@@ -15,6 +15,8 @@ import Notices from './pages/Notices';
 import Events from './pages/Events';
 import Messages from './pages/Messages';
 import Reports from './pages/Reports';
+import Settings from './pages/Settings';
+import Help from './pages/Help';
 
 export default function App() {
   return (
@@ -35,8 +37,8 @@ export default function App() {
             <Route path="events" element={<Events />} />
             <Route path="messages" element={<Messages />} />
             <Route path="reports" element={<Reports />} />
-            <Route path="settings" element={<div className="p-6 bg-white rounded-card">EduAdmin School Settings</div>} />
-            <Route path="help" element={<div className="p-6 bg-white rounded-card">EduAdmin Documentation & Help</div>} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="help" element={<Help />} />
           </Route>
         </Routes>
       </BrowserRouter>
