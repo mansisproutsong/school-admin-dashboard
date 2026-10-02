@@ -138,94 +138,16 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* 5. QUICK ACTIONS GRID */}
-      <div className="space-y-3">
-        <h2 className="font-bold text-sm text-ink">Quick Actions</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          <Link to="/students" className="bg-white rounded-card border border-line p-4 flex flex-col items-center gap-2 text-center hover:border-primary hover:shadow-soft transition-all group">
-            <span className="w-10 h-10 rounded-btn bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
-              <UserPlus className="w-5 h-5 text-primary group-hover:text-white" />
-            </span>
-            <span className="text-xs font-semibold text-ink">Add Student</span>
-          </Link>
-
-          <Link to="/attendance" className="bg-white rounded-card border border-line p-4 flex flex-col items-center gap-2 text-center hover:border-success hover:shadow-soft transition-all group">
-            <span className="w-10 h-10 rounded-btn bg-success/10 flex items-center justify-center group-hover:bg-success group-hover:text-white transition-colors">
-              <UserCheck className="w-5 h-5 text-success group-hover:text-white" />
-            </span>
-            <span className="text-xs font-semibold text-ink">Mark Attendance</span>
-          </Link>
-
-          <Link to="/notices" className="bg-white rounded-card border border-line p-4 flex flex-col items-center gap-2 text-center hover:border-warning hover:shadow-soft transition-all group">
-            <span className="w-10 h-10 rounded-btn bg-warning/10 flex items-center justify-center group-hover:bg-warning group-hover:text-white transition-colors">
-              <Megaphone className="w-5 h-5 text-warning group-hover:text-white" />
-            </span>
-            <span className="text-xs font-semibold text-ink">Create Notice</span>
-          </Link>
-
-          <Link to="/events" className="bg-white rounded-card border border-line p-4 flex flex-col items-center gap-2 text-center hover:border-purple-500 hover:shadow-soft transition-all group">
-            <span className="w-10 h-10 rounded-btn bg-purple-500/10 flex items-center justify-center group-hover:bg-purple-500 group-hover:text-white transition-colors">
-              <CalendarPlus className="w-5 h-5 text-purple-600 group-hover:text-white" />
-            </span>
-            <span className="text-xs font-semibold text-ink">Add Event</span>
-          </Link>
-
-          <Link to="/fees" className="bg-white rounded-card border border-line p-4 flex flex-col items-center gap-2 text-center hover:border-blue-500 hover:shadow-soft transition-all group">
-            <span className="w-10 h-10 rounded-btn bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white transition-colors">
-              <Receipt className="w-5 h-5 text-blue-600 group-hover:text-white" />
-            </span>
-            <span className="text-xs font-semibold text-ink">Record Fee</span>
-          </Link>
-
-          <Link to="/reports" className="bg-white rounded-card border border-line p-4 flex flex-col items-center gap-2 text-center hover:border-emerald-500 hover:shadow-soft transition-all group">
-            <span className="w-10 h-10 rounded-btn bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-              <FileText className="w-5 h-5 text-emerald-600 group-hover:text-white" />
-            </span>
-            <span className="text-xs font-semibold text-ink">Reports</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* 6. UPCOMING EVENTS & RECENT NOTICES GRID */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Events */}
-        <div className="bg-white rounded-card border border-line p-5 shadow-soft space-y-4">
+      {/* 5. DASHBOARD BOTTOM: NOTICES & CALENDAR */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column: Notices */}
+        <div className="lg:col-span-2 bg-white rounded-card border border-line p-5 shadow-soft space-y-4">
           <div className="flex items-center justify-between border-b border-line pb-3">
             <h3 className="font-bold text-sm text-ink flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-primary" /> Upcoming Events
-            </h3>
-            <Link to="/events" className="text-xs font-semibold text-primary hover:underline flex items-center gap-1">
-              View Calendar <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-          <div className="space-y-3">
-            {eventsList.map((evt) => (
-              <div key={evt.id} className="flex items-center justify-between p-3 rounded-btn border border-line hover:bg-slate-50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-btn bg-primary/10 flex items-center justify-center shrink-0">
-                    <Trophy className="w-4 h-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-ink">{evt.title}</p>
-                    <p className="text-[11px] text-muted">{evt.date} • {evt.time}</p>
-                  </div>
-                </div>
-                <span className="text-[10px] font-semibold bg-slate-100 text-muted px-2 py-1 rounded-full">
-                  {evt.category}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Notices */}
-        <div className="bg-white rounded-card border border-line p-5 shadow-soft space-y-4">
-          <div className="flex items-center justify-between border-b border-line pb-3">
-            <h3 className="font-bold text-sm text-ink flex items-center gap-2">
-              <Megaphone className="w-4 h-4 text-warning" /> Recent Notices
+              <Megaphone className="w-4 h-4 text-warning" /> Recent Announcements & Notices
             </h3>
             <Link to="/notices" className="text-xs font-semibold text-primary hover:underline flex items-center gap-1">
-              View All Notices <ArrowRight className="w-3.5 h-3.5" />
+              View All <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
           <div className="space-y-3">
@@ -242,6 +164,54 @@ export default function Dashboard() {
                 </span>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Right Column: Calendar & Events */}
+        <div className="space-y-6 lg:col-span-1">
+          {/* Calendar Widget */}
+          <div className="bg-white rounded-card border border-line p-5 shadow-soft space-y-4">
+            <div className="flex items-center justify-between">
+              <button className="p-1 hover:bg-slate-100 rounded text-muted">&lt;</button>
+              <h3 className="font-bold text-sm text-ink">October 2026</h3>
+              <button className="p-1 hover:bg-slate-100 rounded text-muted">&gt;</button>
+            </div>
+            
+            <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-muted mb-2">
+              <div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div><div>SUN</div>
+            </div>
+            <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-ink">
+              <div className="text-slate-300">28</div><div className="text-slate-300">29</div><div className="text-slate-300">30</div>
+              <div className="p-1">1</div>
+              <div className="p-1 bg-primary text-white rounded font-bold shadow-sm">2</div>
+              <div className="p-1">3</div><div className="p-1 text-danger">4</div>
+              <div className="p-1">5</div><div className="p-1">6</div><div className="p-1">7</div><div className="p-1">8</div><div className="p-1">9</div><div className="p-1">10</div><div className="p-1 text-danger">11</div>
+              <div className="p-1 bg-blue-100 text-blue-800 rounded font-bold">12</div>
+              <div className="p-1">13</div><div className="p-1">14</div><div className="p-1">15</div><div className="p-1">16</div><div className="p-1">17</div><div className="p-1 text-danger">18</div>
+              <div className="p-1">19</div><div className="p-1">20</div><div className="p-1">21</div><div className="p-1">22</div><div className="p-1">23</div><div className="p-1">24</div><div className="p-1 text-danger">25</div>
+              <div className="p-1">26</div><div className="p-1">27</div><div className="p-1">28</div><div className="p-1">29</div><div className="p-1">30</div><div className="p-1">31</div>
+              <div className="text-slate-300">1</div>
+            </div>
+          </div>
+
+          {/* Events */}
+          <div className="bg-white rounded-card border border-line p-5 shadow-soft space-y-4">
+            <div className="flex items-center justify-between border-b border-line pb-3">
+              <h3 className="font-bold text-sm text-ink flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-primary" /> Upcoming Events
+              </h3>
+            </div>
+            <div className="space-y-3">
+              {eventsList.slice(0, 3).map((evt) => (
+                <div key={evt.id} className="p-3 rounded-btn border-l-2 border-primary bg-slate-50">
+                  <p className="text-xs font-bold text-ink">{evt.title}</p>
+                  <p className="text-[10px] text-muted mt-0.5">{evt.date} • {evt.time}</p>
+                </div>
+              ))}
+              <Link to="/events" className="block text-center text-xs font-semibold text-primary hover:underline mt-2">
+                View All Events
+              </Link>
+            </div>
           </div>
         </div>
       </div>

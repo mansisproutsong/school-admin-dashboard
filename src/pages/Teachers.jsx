@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { useFilter } from '../context/FilterContext';
 import ClassSelector from '../components/common/ClassSelector';
-import { teachersList } from '../data/mockData';
+import { teachers } from '../data/teachers';
 import { Presentation, Users, UserCheck, ShieldCheck, Search, Filter, Plus, Phone, Mail } from 'lucide-react';
 
 export default function Teachers() {
   const { selectedClassId } = useFilter();
   const [searchTerm, setSearchTerm] = useState('');
   const [deptFilter, setDeptFilter] = useState('ALL');
-  const [teachers, setTeachers] = useState(teachersList);
+  const [teachersState, setTeachersState] = useState(teachers);
 
-  const displayedTeachers = teachers.filter(t => {
+  const displayedTeachers = teachersState.filter(t => {
     const matchesSearch = t.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           t.department.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDept = deptFilter === 'ALL' || t.department === deptFilter;
@@ -142,7 +142,7 @@ export default function Teachers() {
                     <td className="py-3.5 px-3 font-semibold text-muted">{t.department}</td>
                     <td className="py-3.5 px-3">
                       <span className="bg-primary/10 text-primary px-2.5 py-0.5 rounded-full font-bold">
-                        {t.classes}
+                        {t.assignedClasses.join(', ')}
                       </span>
                     </td>
                     <td className="py-3.5 px-3 text-muted">{t.phone}</td>

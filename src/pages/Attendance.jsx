@@ -11,6 +11,7 @@ export default function Attendance() {
   const { getFilteredData, selectedClassId } = useFilter();
   const { isOverall, scopeText, kpis, students } = getFilteredData();
   const [period, setPeriod] = useState('Week');
+  const [viewType, setViewType] = useState('Students');
 
   const trendData = getFilteredData().attendanceChartData;
 
@@ -23,7 +24,16 @@ export default function Attendance() {
     { name: '8-B', Attendance: 91 },
   ];
 
+  const teacherAttendanceData = [
+    { name: 'Mr. Ahsan Bukhari', role: 'Mathematics', attendancePct: 98, status: 'Present' },
+    { name: 'Ms. Rabia Sultan', role: 'Physics', attendancePct: 95, status: 'Present' },
+    { name: 'Ms. Sania Yousaf', role: 'English', attendancePct: 88, status: 'Present' },
+    { name: 'Mr. Faisal Karim', role: 'Chemistry', attendancePct: 72, status: 'Absent' },
+    { name: 'Mr. Adeel Nasir', role: 'Computer Science', attendancePct: 99, status: 'Present' }
+  ];
+
   const lowAttendanceStudents = students.filter(s => s.attendancePct < 75);
+  const lowAttendanceTeachers = teacherAttendanceData.filter(t => t.attendancePct < 75);
 
   return (
     <div className="space-y-6">
@@ -32,8 +42,21 @@ export default function Attendance() {
       {/* Header & Period Filters */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-ink">Attendance Management & Analytics</h1>
-          <p className="text-xs text-muted mt-0.5">{scopeText}</p>
+          <div className="flex items-center gap-4">
+            <h1 className="text-xl font-bold text-ink">Attendance</h1>
+            <div className="flex items-center bg-slate-100 p-1 rounded-btn text-xs font-semibold">
+              {['Students', 'Teachers'].map(v => (
+                <button 
+                  key={v} 
+                  onClick={() => setViewType(v)} 
+                  className={`px-3 py-1.5 rounded-md transition-colors ${viewType === v ? 'bg-white shadow-sm text-primary' : 'text-muted hover:text-ink'}`}
+                >
+                  {v}
+                </button>
+              ))}
+            </div>
+          </div>
+          <p className="text-xs text-muted mt-1">{scopeText}</p>
         </div>
 
         <div className="flex items-center gap-1 bg-white border border-line p-1 rounded-btn shadow-soft text-xs font-semibold">
@@ -58,7 +81,7 @@ export default function Attendance() {
             <ClipboardCheck className="w-6 h-6 text-success" />
           </span>
           <div>
-            <p className="text-2xl font-bold text-ink">{kpis.attendancePct}</p>
+            <p className="text-2xl font-bold text-ink">{viewType === 'Students' ? kpis.attendancePct : '94%'}</p>
             <p className="text-xs text-muted mt-0.5">Average Attendance Rate</p>
           </div>
         </div>
@@ -69,7 +92,7 @@ export default function Attendance() {
           </span>
           <div>
             <p className="text-2xl font-bold text-ink">
-              {isOverall ? '95 Students' : '2 Students'}
+              {viewType === 'Students' ? (isOverall ? '95 Students' : '2 Students') : '4 Teachers'}
             </p>
             <p className="text-xs text-muted mt-0.5">Absent Today</p>
           </div>
@@ -81,7 +104,7 @@ export default function Attendance() {
           </span>
           <div>
             <p className="text-2xl font-bold text-ink">
-              {isOverall ? '26 Students' : '1 Student'}
+              {viewType === 'Students' ? (isOverall ? '26 Students' : '1 Student') : '2 Teachers'}
             </p>
             <p className="text-xs text-muted mt-0.5">Late Arrivals Today</p>
           </div>
@@ -139,60 +162,117 @@ export default function Attendance() {
       </div>
 
       {/* Low Attendance Alert Table (<75%) */}
-      <div className="bg-white rounded-card border border-line p-5 shadow-soft space-y-4">
-        <div className="flex items-center justify-between border-b border-line pb-3">
-          <h3 className="font-bold text-sm text-ink flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-danger" /> Low Attendance Alert (&lt;75%)
-          </h3>
-          <span className="text-xs text-danger font-semibold bg-danger/10 px-2.5 py-1 rounded-full">
-            Action Needed
-          </span>
-        </div>
+      {viewType === 'Students' ? (
+        <div className="bg-white rounded-card border border-line p-5 shadow-soft space-y-4">
+          <div className="flex items-center justify-between border-b border-line pb-3">
+            <h3 className="font-bold text-sm text-ink flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-danger" /> Low Attendance Alert (&lt;75%)
+            </h3>
+            <span className="text-xs text-danger font-semibold bg-danger/10 px-2.5 py-1 rounded-full">
+              Action Needed
+            </span>
+          </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs text-left">
-            <thead>
-              <tr className="text-muted border-b border-line bg-slate-50 font-bold uppercase text-[10px]">
-                <th className="py-2.5 px-4">Student Name</th>
-                <th className="py-2.5 px-3">Class</th>
-                <th className="py-2.5 px-3">Attendance</th>
-                <th className="py-2.5 px-3">Parent Contact</th>
-                <th className="py-2.5 px-4 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {lowAttendanceStudents.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="text-center py-6 text-muted">
-                    No students currently below 75% attendance in this scope!
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs text-left">
+              <thead>
+                <tr className="text-muted border-b border-line bg-slate-50 font-bold uppercase text-[10px]">
+                  <th className="py-2.5 px-4">Student Name</th>
+                  <th className="py-2.5 px-3">Class</th>
+                  <th className="py-2.5 px-3">Attendance</th>
+                  <th className="py-2.5 px-3">Parent Contact</th>
+                  <th className="py-2.5 px-4 text-right">Action</th>
                 </tr>
-              ) : (
-                lowAttendanceStudents.map((s) => (
-                  <tr key={s.id} className="hover:bg-slate-50">
-                    <td className="py-3 px-4 font-semibold text-ink">{s.name}</td>
-                    <td className="py-3 px-3 text-muted">Class {s.classId}</td>
-                    <td className="py-3 px-3">
-                      <span className="font-bold text-danger bg-danger/10 px-2 py-0.5 rounded-full">
-                        {s.attendancePct}%
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 text-muted">{s.parentPhone}</td>
-                    <td className="py-3 px-4 text-right">
-                      <button 
-                        onClick={() => alert(`Warning notice issued to parent of ${s.name}`)}
-                        className="text-xs font-semibold text-danger hover:underline"
-                      >
-                        Issue Warning Notice
-                      </button>
+              </thead>
+              <tbody className="divide-y divide-line">
+                {lowAttendanceStudents.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="text-center py-6 text-muted">
+                      No students currently below 75% attendance in this scope!
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  lowAttendanceStudents.map((s) => (
+                    <tr key={s.id} className="hover:bg-slate-50">
+                      <td className="py-3 px-4 font-semibold text-ink">{s.name}</td>
+                      <td className="py-3 px-3 text-muted">Class {s.classId}</td>
+                      <td className="py-3 px-3">
+                        <span className="font-bold text-danger bg-danger/10 px-2 py-0.5 rounded-full">
+                          {s.attendancePct}%
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-muted">{s.parentPhone}</td>
+                      <td className="py-3 px-4 text-right">
+                        <button 
+                          onClick={() => alert(`Warning notice issued to parent of ${s.name}`)}
+                          className="text-xs font-semibold text-danger hover:underline"
+                        >
+                          Issue Warning Notice
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="bg-white rounded-card border border-line p-5 shadow-soft space-y-4">
+          <div className="flex items-center justify-between border-b border-line pb-3">
+            <h3 className="font-bold text-sm text-ink flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-danger" /> Low Attendance Teachers (&lt;75%)
+            </h3>
+            <span className="text-xs text-danger font-semibold bg-danger/10 px-2.5 py-1 rounded-full">
+              Review Needed
+            </span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs text-left">
+              <thead>
+                <tr className="text-muted border-b border-line bg-slate-50 font-bold uppercase text-[10px]">
+                  <th className="py-2.5 px-4">Teacher Name</th>
+                  <th className="py-2.5 px-3">Subject / Role</th>
+                  <th className="py-2.5 px-3">Attendance</th>
+                  <th className="py-2.5 px-3">Status</th>
+                  <th className="py-2.5 px-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-line">
+                {lowAttendanceTeachers.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="text-center py-6 text-muted">
+                      No teachers currently below 75% attendance!
+                    </td>
+                  </tr>
+                ) : (
+                  lowAttendanceTeachers.map((t, idx) => (
+                    <tr key={idx} className="hover:bg-slate-50">
+                      <td className="py-3 px-4 font-semibold text-ink">{t.name}</td>
+                      <td className="py-3 px-3 text-muted">{t.role}</td>
+                      <td className="py-3 px-3">
+                        <span className="font-bold text-danger bg-danger/10 px-2 py-0.5 rounded-full">
+                          {t.attendancePct}%
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-muted">{t.status}</td>
+                      <td className="py-3 px-4 text-right">
+                        <button 
+                          onClick={() => alert(`Reminder sent to ${t.name}`)}
+                          className="text-xs font-semibold text-primary hover:underline"
+                        >
+                          Send Reminder
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

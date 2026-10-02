@@ -46,8 +46,6 @@ export default function Help() {
 
   return (
     <div className="space-y-6">
-      <ClassSelector />
-
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-xl font-bold text-ink">Documentation & Help Center</h1>
@@ -59,20 +57,7 @@ export default function Help() {
         </span>
       </div>
 
-      {/* Search Bar */}
-      <div className="bg-primary/5 rounded-card border border-primary/20 p-6 text-center space-y-3">
-        <h2 className="text-base font-bold text-ink">How can we help you today, Principal Jogani?</h2>
-        <div className="relative max-w-lg mx-auto">
-          <Search className="w-4 h-4 text-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input 
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search FAQs, features, guides..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-inp border border-line bg-white text-xs text-ink focus:outline-none focus:ring-2 focus:ring-primary/25 shadow-soft"
-          />
-        </div>
-      </div>
+      
 
       {/* Quick Access Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

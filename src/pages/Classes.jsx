@@ -1,14 +1,16 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useFilter } from '../context/FilterContext';
 import ClassSelector from '../components/common/ClassSelector';
 import { School, User, Award, Users } from 'lucide-react';
 
 export default function Classes() {
   const { classesList, setSelectedClassId } = useFilter();
+  const navigate = useNavigate();
 
   return (
     <div className="space-y-6">
-      <ClassSelector />
+
 
       <div className="flex items-center justify-between">
         <div>
@@ -24,7 +26,10 @@ export default function Classes() {
           return (
             <div 
               key={cls.id}
-              onClick={() => setSelectedClassId(cls.id)}
+              onClick={() => {
+                setSelectedClassId(cls.id);
+                navigate('/students');
+              }}
               className="bg-white rounded-card border border-line p-5 shadow-soft hover:border-primary cursor-pointer transition-all space-y-4 group"
             >
               <div className="flex items-start justify-between">

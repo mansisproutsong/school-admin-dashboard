@@ -12,6 +12,11 @@ export default function Exams() {
     { id: 3, title: 'Unit Test — English', cls: '9-B', date: 'Oct 05, 2026', time: '10:00 AM - 11:30 AM', status: 'Upcoming' },
     { id: 4, title: 'Final — Computer Science', cls: '10-B', date: 'Sep 28, 2026', time: '9:00 AM - 12:00 PM', status: 'Completed' },
     { id: 5, title: 'Term 1 — Chemistry Lab', cls: '11-Science', date: 'Oct 18, 2026', time: '1:00 PM - 3:00 PM', status: 'Upcoming' },
+    { id: 6, title: 'Mid-Term — Biology', cls: '11-Science', date: 'Oct 20, 2026', time: '10:00 AM - 1:00 PM', status: 'Upcoming' },
+    { id: 7, title: 'Unit Test — History', cls: '8-A', date: 'Oct 22, 2026', time: '9:00 AM - 10:30 AM', status: 'Upcoming' },
+    { id: 8, title: 'Final — Accountancy', cls: '12-Commerce', date: 'Sep 25, 2026', time: '9:00 AM - 12:00 PM', status: 'Completed' },
+    { id: 9, title: 'Term 1 — Geography', cls: '9-A', date: 'Oct 25, 2026', time: '11:00 AM - 1:00 PM', status: 'Upcoming' },
+    { id: 10, title: 'Mid-Term — Economics', cls: '11-Commerce', date: 'Oct 28, 2026', time: '9:00 AM - 12:00 PM', status: 'Upcoming' },
   ]);
 
   const [newExam, setNewExam] = useState({

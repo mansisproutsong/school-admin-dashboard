@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useFilter } from '../context/FilterContext';
 import ClassSelector from '../components/common/ClassSelector';
 import StudentDrawer from '../components/common/StudentDrawer';
@@ -8,11 +9,23 @@ import { Search, Filter, Eye, UserPlus, X } from 'lucide-react';
 export default function Students() {
   const { getFilteredData, selectedClassId, addStudent, classesList } = useFilter();
   const { students } = getFilteredData();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [feeFilter, setFeeFilter] = useState('ALL');
+  const [attendanceFilter, setAttendanceFilter] = useState('ALL');
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(50); // Pagination/lazy load
+
+  useEffect(() => {
+    const filterParam = searchParams.get('filter');
+    if (filterParam === 'low_attendance') {
+      setAttendanceFilter('LOW');
+    } else if (filterParam === 'overdue') {
+      setFeeFilter('Overdue');
+    }
+  }, [searchParams]);
 
   const [newStudent, setNewStudent] = useState({
     name: '',
@@ -48,21 +61,28 @@ export default function Students() {
     const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           student.rollNo.includes(searchTerm);
     const matchesFee = feeFilter === 'ALL' || student.feeStatus === feeFilter;
-    return matchesSearch && matchesFee;
+    const matchesAttendance = attendanceFilter === 'ALL' || (attendanceFilter === 'LOW' && student.attendancePct < 75);
+    return matchesSearch && matchesFee && matchesAttendance;
   });
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setFeeFilter('ALL');
+    setAttendanceFilter('ALL');
+    setSearchParams({});
+  };
 
   return (
     <div className="space-y-6">
       <ClassSelector />
 
-      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-ink">Student Management</h1>
           <p className="text-xs text-muted mt-0.5">
             {selectedClassId === 'ALL' 
-              ? `Showing all ${students.length + 1240} enrolled students across Green Valley International School` 
-              : `Showing students enrolled in Class ${selectedClassId}`}
+              ? `Showing all ${students.length} enrolled students across Green Valley` 
+              : `Showing ${students.length} students enrolled in Class ${selectedClassId}`}
           </p>
         </div>
 
@@ -74,9 +94,34 @@ export default function Students() {
         </button>
       </div>
 
-      {/* Filter & Search Bar */}
-      <div className="bg-white p-4 rounded-card border border-line shadow-soft flex flex-wrap items-center justify-between gap-3">
-        <div className="relative max-w-xs w-full">
+      {/* Analytics KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-5 rounded-card border border-line shadow-soft">
+          <p className="text-2xl font-bold text-ink">{students.length}</p>
+          <p className="text-xs text-muted mt-1">Total Enrolled Students</p>
+        </div>
+        <div className="bg-white p-5 rounded-card border border-line shadow-soft">
+          <p className="text-2xl font-bold text-success">
+            {students.length > 0 ? Math.round(students.reduce((acc, curr) => acc + curr.attendancePct, 0) / students.length) : 0}%
+          </p>
+          <p className="text-xs text-muted mt-1">Average Attendance</p>
+        </div>
+        <div className="bg-white p-5 rounded-card border border-line shadow-soft">
+          <p className="text-2xl font-bold text-purple-600">
+            {students.length > 0 ? Math.round(students.reduce((acc, curr) => acc + curr.performanceAvg, 0) / students.length) : 0}%
+          </p>
+          <p className="text-xs text-muted mt-1">Academic Average</p>
+        </div>
+        <div className="bg-white p-5 rounded-card border border-line shadow-soft">
+          <p className="text-2xl font-bold text-danger">
+            {students.filter(s => s.feeStatus !== 'Paid').length}
+          </p>
+          <p className="text-xs text-muted mt-1">Pending Fee Students</p>
+        </div>
+      </div>
+
+      <div className="bg-white p-4 rounded-card border border-line shadow-soft flex flex-col sm:flex-row flex-wrap items-center justify-between gap-3">
+        <div className="relative w-full sm:max-w-xs">
           <Search className="w-4 h-4 text-muted absolute left-3 top-1/2 -translate-y-1/2" />
           <input 
             type="text"
@@ -87,32 +132,44 @@ export default function Students() {
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <Filter className="w-3.5 h-3.5 text-muted" />
-          <span className="text-xs font-semibold text-muted">Fee Status:</span>
-          <select 
-            value={feeFilter}
-            onChange={(e) => setFeeFilter(e.target.value)}
-            className="bg-bg border border-line text-xs font-semibold rounded-inp px-3 py-1.5 focus:outline-none"
-          >
-            <option value="ALL">All Statuses</option>
-            <option value="Paid">Paid</option>
-            <option value="Pending">Pending</option>
-            <option value="Overdue">Overdue</option>
-          </select>
+        <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-muted">Attendance:</span>
+            <select 
+              value={attendanceFilter}
+              onChange={(e) => setAttendanceFilter(e.target.value)}
+              className="bg-bg border border-line text-xs font-semibold rounded-inp px-3 py-1.5 focus:outline-none"
+            >
+              <option value="ALL">All</option>
+              <option value="LOW">Below 75%</option>
+            </select>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-muted">Fee Status:</span>
+            <select 
+              value={feeFilter}
+              onChange={(e) => setFeeFilter(e.target.value)}
+              className="bg-bg border border-line text-xs font-semibold rounded-inp px-3 py-1.5 focus:outline-none"
+            >
+              <option value="ALL">All Statuses</option>
+              <option value="Paid">Paid</option>
+              <option value="Pending">Pending</option>
+              <option value="Overdue">Overdue</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      {/* Students Data Table */}
       {displayedStudents.length === 0 ? (
         <EmptyState 
-          message="No students found matching your search term or fee filter."
-          onClearFilter={() => { setSearchTerm(''); setFeeFilter('ALL'); }} 
+          message="No students found matching your filters."
+          onClearFilter={clearFilters} 
         />
       ) : (
         <div className="bg-white rounded-card border border-line shadow-soft overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left">
+            <table className="w-full min-w-[700px] text-xs text-left">
               <thead>
                 <tr className="text-muted border-b border-line bg-slate-50 font-bold uppercase tracking-wider text-[10px]">
                   <th className="py-3 px-5">Student Name</th>
@@ -125,7 +182,7 @@ export default function Students() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
-                {displayedStudents.map((student) => (
+                {displayedStudents.slice(0, visibleCount).map((student) => (
                   <tr 
                     key={student.id} 
                     onClick={() => setSelectedStudent(student)}
@@ -167,10 +224,19 @@ export default function Students() {
               </tbody>
             </table>
           </div>
+          {visibleCount < displayedStudents.length && (
+            <div className="p-3 border-t border-line text-center bg-slate-50">
+              <button 
+                onClick={() => setVisibleCount(prev => prev + 50)}
+                className="text-xs font-semibold text-primary hover:underline"
+              >
+                Load More Students
+              </button>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Add Student Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 bg-ink/40 flex items-center justify-center p-4">
           <div className="bg-white rounded-card w-full max-w-md p-6 space-y-4 shadow-xl border border-line animate-fadeIn">
@@ -186,24 +252,13 @@ export default function Students() {
             <form onSubmit={handleCreateStudent} className="space-y-3 text-xs">
               <div>
                 <label className="font-semibold text-muted">Full Name</label>
-                <input 
-                  required 
-                  type="text" 
-                  value={newStudent.name} 
-                  onChange={(e) => setNewStudent({...newStudent, name: e.target.value})} 
-                  placeholder="e.g. Rahul Verma" 
-                  className="w-full mt-1 p-2.5 border border-line rounded-inp focus:outline-none focus:ring-2 focus:ring-primary/25" 
-                />
+                <input required type="text" value={newStudent.name} onChange={(e) => setNewStudent({...newStudent, name: e.target.value})} placeholder="e.g. Rahul Verma" className="w-full mt-1 p-2.5 border border-line rounded-inp focus:outline-none focus:ring-2 focus:ring-primary/25" />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="font-semibold text-muted">Class</label>
-                  <select 
-                    value={newStudent.classId}
-                    onChange={(e) => setNewStudent({...newStudent, classId: e.target.value})}
-                    className="w-full mt-1 p-2.5 border border-line rounded-inp focus:outline-none"
-                  >
+                  <select value={newStudent.classId} onChange={(e) => setNewStudent({...newStudent, classId: e.target.value})} className="w-full mt-1 p-2.5 border border-line rounded-inp focus:outline-none">
                     {classesList.map((c) => (
                       <option key={c.id} value={c.id}>Class {c.id}</option>
                     ))}
@@ -211,59 +266,29 @@ export default function Students() {
                 </div>
                 <div>
                   <label className="font-semibold text-muted">Roll Number</label>
-                  <input 
-                    required 
-                    type="text" 
-                    value={newStudent.rollNo} 
-                    onChange={(e) => setNewStudent({...newStudent, rollNo: e.target.value})} 
-                    placeholder="e.g. 25" 
-                    className="w-full mt-1 p-2.5 border border-line rounded-inp" 
-                  />
+                  <input required type="text" value={newStudent.rollNo} onChange={(e) => setNewStudent({...newStudent, rollNo: e.target.value})} placeholder="e.g. 25" className="w-full mt-1 p-2.5 border border-line rounded-inp" />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="font-semibold text-muted">Parent Name</label>
-                  <input 
-                    required 
-                    type="text" 
-                    value={newStudent.parentName} 
-                    onChange={(e) => setNewStudent({...newStudent, parentName: e.target.value})} 
-                    placeholder="e.g. Rajesh Verma" 
-                    className="w-full mt-1 p-2.5 border border-line rounded-inp" 
-                  />
+                  <input required type="text" value={newStudent.parentName} onChange={(e) => setNewStudent({...newStudent, parentName: e.target.value})} placeholder="e.g. Rajesh Verma" className="w-full mt-1 p-2.5 border border-line rounded-inp" />
                 </div>
                 <div>
                   <label className="font-semibold text-muted">Parent Phone</label>
-                  <input 
-                    required 
-                    type="text" 
-                    value={newStudent.parentPhone} 
-                    onChange={(e) => setNewStudent({...newStudent, parentPhone: e.target.value})} 
-                    placeholder="+91 98765 43210" 
-                    className="w-full mt-1 p-2.5 border border-line rounded-inp" 
-                  />
+                  <input required type="text" value={newStudent.parentPhone} onChange={(e) => setNewStudent({...newStudent, parentPhone: e.target.value})} placeholder="+91 98765 43210" className="w-full mt-1 p-2.5 border border-line rounded-inp" />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="font-semibold text-muted">Term Fee Amount (₹)</label>
-                  <input 
-                    type="number" 
-                    value={newStudent.feeAmount} 
-                    onChange={(e) => setNewStudent({...newStudent, feeAmount: e.target.value})} 
-                    className="w-full mt-1 p-2.5 border border-line rounded-inp" 
-                  />
+                  <input type="number" value={newStudent.feeAmount} onChange={(e) => setNewStudent({...newStudent, feeAmount: e.target.value})} className="w-full mt-1 p-2.5 border border-line rounded-inp" />
                 </div>
                 <div>
                   <label className="font-semibold text-muted">Fee Status</label>
-                  <select 
-                    value={newStudent.feeStatus}
-                    onChange={(e) => setNewStudent({...newStudent, feeStatus: e.target.value})}
-                    className="w-full mt-1 p-2.5 border border-line rounded-inp"
-                  >
+                  <select value={newStudent.feeStatus} onChange={(e) => setNewStudent({...newStudent, feeStatus: e.target.value})} className="w-full mt-1 p-2.5 border border-line rounded-inp">
                     <option value="Paid">Paid</option>
                     <option value="Pending">Pending</option>
                     <option value="Overdue">Overdue</option>
@@ -272,30 +297,15 @@ export default function Students() {
               </div>
 
               <div className="flex justify-end gap-2 pt-3 border-t border-line">
-                <button 
-                  type="button" 
-                  onClick={() => setShowAddModal(false)} 
-                  className="px-4 py-2 border border-line rounded-btn hover:bg-slate-50 font-semibold"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  className="px-4 py-2 bg-primary text-white font-bold rounded-btn hover:bg-blue-700"
-                >
-                  Save Student
-                </button>
+                <button type="button" onClick={() => setShowAddModal(false)} className="px-4 py-2 border border-line rounded-btn hover:bg-slate-50 font-semibold">Cancel</button>
+                <button type="submit" className="px-4 py-2 bg-primary text-white font-bold rounded-btn hover:bg-blue-700">Save Student</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Student Profile Slide-over Drawer */}
-      <StudentDrawer 
-        student={selectedStudent} 
-        onClose={() => setSelectedStudent(null)} 
-      />
+      <StudentDrawer student={selectedStudent} onClose={() => setSelectedStudent(null)} />
     </div>
   );
 }

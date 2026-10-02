@@ -38,8 +38,6 @@ export default function Settings() {
 
   return (
     <div className="space-y-6">
-      <ClassSelector />
-
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-xl font-bold text-ink">Institutional Settings & Preferences</h1>

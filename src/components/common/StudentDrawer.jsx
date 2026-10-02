@@ -105,10 +105,25 @@ export default function StudentDrawer({ student, onClose }) {
                 <div className="p-4 bg-bg border border-line rounded-card space-y-2">
                   <p className="font-bold text-ink">Subject Breakdown</p>
                   <div className="space-y-1.5 pt-1">
-                    <div className="flex justify-between"><span>Mathematics</span><span className="font-bold">84%</span></div>
-                    <div className="flex justify-between"><span>Physics</span><span className="font-bold">88%</span></div>
-                    <div className="flex justify-between"><span>English</span><span className="font-bold">92%</span></div>
-                    <div className="flex justify-between"><span>Computer Science</span><span className="font-bold">95%</span></div>
+                    {(() => {
+                        const classSubjects = {
+                          '11-Science': ['Mathematics', 'English', 'Physics', 'Chemistry', 'Biology', 'Computer Science', 'Physical Education'],
+                          '12-Science': ['Mathematics', 'English', 'Physics', 'Chemistry', 'Biology', 'Computer Science', 'Physical Education'],
+                          '11-Commerce': ['Accountancy', 'Economics', 'Business Studies', 'English', 'Mathematics', 'Computer Science', 'Physical Education'],
+                          '12-Commerce': ['Accountancy', 'Economics', 'Business Studies', 'English', 'Mathematics', 'Computer Science', 'Physical Education']
+                        };
+                        const subs = classSubjects[student.classId] || ['Mathematics', 'English', 'Science', 'Social Studies', 'Computer Science', 'Hindi', 'Gujarati'];
+                        
+                        return subs.map((sub, idx) => {
+                            const score = Math.min(100, Math.max(40, student.performanceAvg + (idx % 2 === 0 ? 5 : -4) + (idx * 2) - 3));
+                            return (
+                                <div key={sub} className="flex justify-between py-1 border-b border-line last:border-0">
+                                    <span>{sub}</span>
+                                    <span className="font-bold text-ink">{score}%</span>
+                                </div>
+                            );
+                        });
+                    })()}
                   </div>
                 </div>
               </div>

@@ -13,12 +13,12 @@ export default function Header({ onMenuClick }) {
           <Menu className="w-5 h-5" />
         </button>
 
-        <div className="relative max-w-xs w-full hidden sm:block">
-          <Search className="w-4 h-4 text-muted absolute left-3 top-1/2 -translate-y-1/2" />
+        <div className="relative max-w-md w-full hidden sm:block group">
+          <Search className="w-4 h-4 text-muted absolute left-3.5 top-1/2 -translate-y-1/2 group-focus-within:text-primary transition-colors" />
           <input 
             type="text" 
             placeholder="Search students, teachers, classes..." 
-            className="w-full pl-9 pr-3 py-2 rounded-inp border border-line text-xs bg-bg focus:outline-none focus:ring-2 focus:ring-primary/25"
+            className="w-full pl-10 pr-4 py-2.5 rounded-full border border-slate-200 bg-slate-50/50 text-xs font-semibold text-ink focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
           />
         </div>
       </div>

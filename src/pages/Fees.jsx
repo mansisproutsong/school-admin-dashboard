@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useFilter } from '../context/FilterContext';
 import ClassSelector from '../components/common/ClassSelector';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
@@ -7,12 +8,19 @@ import { Wallet, AlertCircle, CheckCircle, Clock, Plus, Filter, Search, X } from
 export default function Fees() {
   const { getFilteredData, selectedClassId, recordPayment } = useFilter();
   const { isOverall, scopeText, kpis, feeMonthlyData, students } = getFilteredData();
+  const [searchParams] = useSearchParams();
 
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState(students[0]?.id || '');
   const [payAmount, setPayAmount] = useState(18500);
   const [payStatus, setPayStatus] = useState('Paid');
+
+  useEffect(() => {
+    if (searchParams.get('filter') === 'overdue') {
+      setStatusFilter('Overdue');
+    }
+  }, [searchParams]);
 
   const filteredStudents = students.filter(s => statusFilter === 'ALL' || s.feeStatus === statusFilter);
 
@@ -69,11 +77,11 @@ export default function Fees() {
             <BarChart data={feeMonthlyData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
               <XAxis dataKey="month" stroke="#64748B" />
-              <YAxis stroke="#64748B" />
+              <YAxis stroke="#64748B" tickFormatter={(val) => val.toFixed(1)} />
               <Tooltip 
                 contentStyle={{ backgroundColor: '#0F172A', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
                 itemStyle={{ color: '#F59E0B' }}
-                formatter={(val) => [`₹${val} Lakhs`, 'Collected']}
+                formatter={(val) => [`₹${Number(val).toFixed(2)} Lakhs`, 'Collected']}
               />
               <Bar dataKey="Collected" fill="#F59E0B" radius={[4, 4, 0, 0]} />
             </BarChart>
@@ -105,6 +113,7 @@ export default function Fees() {
                 <th className="py-2.5 px-3">Class</th>
                 <th className="py-2.5 px-3">Term Fee Amount</th>
                 <th className="py-2.5 px-3">Due Date</th>
+                <th className="py-2.5 px-3">Pay Date</th>
                 <th className="py-2.5 px-4 text-right">Status</th>
               </tr>
             </thead>
@@ -115,6 +124,7 @@ export default function Fees() {
                   <td className="py-3 px-3 text-muted">Class {s.classId}</td>
                   <td className="py-3 px-3 font-semibold text-ink">₹{s.feeAmount?.toLocaleString('en-IN')}</td>
                   <td className="py-3 px-3 text-muted">Jul 15, 2026</td>
+                  <td className="py-3 px-3 text-muted font-medium">{s.feeStatus === 'Paid' ? 'Jun 12, 2026' : '-'}</td>
                   <td className="py-3 px-4 text-right">
                     <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
                       s.feeStatus === 'Paid' ? 'bg-success/10 text-success' : 
@@ -157,14 +167,25 @@ export default function Fees() {
                 </select>
               </div>
 
-              <div>
-                <label className="font-semibold text-muted">Amount Paid (₹)</label>
-                <input 
-                  type="number" 
-                  value={payAmount} 
-                  onChange={(e) => setPayAmount(e.target.value)} 
-                  className="w-full mt-1 p-2.5 border border-line rounded-inp" 
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-semibold text-muted">Amount Paid (₹)</label>
+                  <input 
+                    type="number" 
+                    value={payAmount} 
+                    onChange={(e) => setPayAmount(e.target.value)} 
+                    className="w-full mt-1 p-2.5 border border-line rounded-inp focus:outline-none" 
+                  />
+                </div>
+
+                <div>
+                  <label className="font-semibold text-muted">Pay Date</label>
+                  <input 
+                    type="date" 
+                    defaultValue="2026-06-12"
+                    className="w-full mt-1 p-2.5 border border-line rounded-inp focus:outline-none text-muted" 
+                  />
+                </div>
               </div>
 
               <div>

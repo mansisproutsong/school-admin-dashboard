@@ -12,16 +12,15 @@ export function FilterProvider({ children }) {
   const [notices, setNotices] = useState(initialNotices);
   const [events, setEvents] = useState(initialEvents);
 
-  // Helper function to add a new student
   const addStudent = (studentObj) => {
-    const newId = `S${100 + students.length + 1}`;
+    const newId = `S${students.length + 1000}`;
     setStudents(prev => [
       {
         id: newId,
         name: studentObj.name,
         classId: studentObj.classId || '10-A',
         section: studentObj.section || 'A',
-        rollNo: studentObj.rollNo || String(students.length + 1),
+        rollNo: studentObj.rollNo || String(prev.length + 1),
         attendancePct: Number(studentObj.attendancePct) || 92,
         feeStatus: studentObj.feeStatus || 'Paid',
         feeAmount: Number(studentObj.feeAmount) || 18500,
@@ -34,7 +33,6 @@ export function FilterProvider({ children }) {
     ]);
   };
 
-  // Helper to record / update fee payment
   const recordPayment = (studentId, amount, status) => {
     setStudents(prev => prev.map(s => {
       if (s.id === studentId) {
@@ -44,134 +42,116 @@ export function FilterProvider({ children }) {
     }));
   };
 
-  // Helper to add notice
   const addNotice = (noticeObj) => {
-    setNotices(prev => [
-      {
-        id: `N${prev.length + 1}`,
-        title: noticeObj.title,
-        category: noticeObj.category || 'General',
-        priority: noticeObj.priority || 'Medium',
-        date: 'Just Now',
-        targetClass: noticeObj.targetClass || 'ALL'
-      },
-      ...prev
-    ]);
+    setNotices(prev => [{
+      id: `N${prev.length + 1}`,
+      title: noticeObj.title,
+      category: noticeObj.category || 'General',
+      priority: noticeObj.priority || 'Medium',
+      date: 'Just Now',
+      targetClass: noticeObj.targetClass || 'ALL'
+    }, ...prev]);
   };
 
-  // Helper to add event
   const addEvent = (eventObj) => {
-    setEvents(prev => [
-      {
-        id: `E${prev.length + 1}`,
-        title: eventObj.title,
-        date: eventObj.date || 'Oct 25, 2026',
-        time: eventObj.time || '10:00 AM',
-        category: eventObj.category || 'Academic',
-        icon: 'calendar'
-      },
-      ...prev
-    ]);
+    setEvents(prev => [{
+      id: `E${prev.length + 1}`,
+      title: eventObj.title,
+      date: eventObj.date || 'Oct 25, 2026',
+      time: eventObj.time || '10:00 AM',
+      category: eventObj.category || 'Academic',
+      icon: 'calendar'
+    }, ...prev]);
   };
 
-  // Dynamic filter output calculator
   const getFilteredData = () => {
-    const rangeMultiplier = dateRange === 'This Week' ? 0.25 : dateRange === 'This Month' ? 0.65 : 1.0;
-    const rangeLabel = dateRange;
+    const filteredStudents = selectedClassId === 'ALL' 
+      ? students 
+      : students.filter(s => s.classId === selectedClassId);
 
-    if (selectedClassId === 'ALL') {
-      const presentCount = Math.round(1153 * rangeMultiplier);
-      const absentCount = Math.round(95 * rangeMultiplier);
-      const feeCol = (18.6 * (dateRange === 'This Week' ? 0.3 : dateRange === 'This Month' ? 0.7 : 1.0)).toFixed(1);
+    const count = filteredStudents.length;
+    let presentCount = 0;
+    let totalAttendancePct = 0;
+    let totalPerformance = 0;
+    let totalFeeExpected = 0;
+    let totalFeeCollected = 0;
 
-      return {
-        isOverall: true,
-        scopeText: `Showing overall institution metrics (${students.length + 1240} Students | 86 Staff | 42 Classes) • [${rangeLabel}]`,
-        dateRange,
-        kpis: {
-          ...overallKPIs,
-          totalStudents: `${students.length + 1240}`,
-          attendanceBreakdown: `${presentCount} Present • ${absentCount} Absent`,
-          feeCollected: `₹${feeCol}L`,
-          feeExpected: `₹22L`,
-        },
-        students: students,
-        classDetails: null,
-        attendanceChartData: [
-          { day: 'Mon', Present: Math.round(92 * (dateRange === 'This Week' ? 1.0 : 1.0)), Absent: 8 },
-          { day: 'Tue', Present: Math.round(94 * (dateRange === 'This Week' ? 0.95 : 1.0)), Absent: 6 },
-          { day: 'Wed', Present: Math.round(91 * (dateRange === 'This Week' ? 0.98 : 1.0)), Absent: 9 },
-          { day: 'Thu', Present: Math.round(95 * (dateRange === 'This Week' ? 1.02 : 1.0)), Absent: 5 },
-          { day: 'Fri', Present: Math.round(89 * (dateRange === 'This Week' ? 0.9 : 1.0)), Absent: 11 },
-          { day: 'Sat', Present: Math.round(87 * (dateRange === 'This Week' ? 0.85 : 1.0)), Absent: 13 },
-        ],
-        feeMonthlyData: [
-          { month: 'Apr', Collected: Number((3.2 * rangeMultiplier).toFixed(1)) },
-          { month: 'May', Collected: Number((4.5 * rangeMultiplier).toFixed(1)) },
-          { month: 'Jun', Collected: Number((3.8 * rangeMultiplier).toFixed(1)) },
-          { month: 'Jul', Collected: Number((4.1 * rangeMultiplier).toFixed(1)) },
-          { month: 'Aug', Collected: Number((3.0 * rangeMultiplier).toFixed(1)) },
-        ],
-        subjectPerformanceData: [
-          { subject: 'Maths', score: 82 },
-          { subject: 'Science', score: 79 },
-          { subject: 'English', score: 88 },
-          { subject: 'Comp Sci', score: 94 },
-          { subject: 'Social Studies', score: 76 },
-        ]
-      };
+    filteredStudents.forEach(s => {
+      if (s.status === 'Present') presentCount++;
+      totalAttendancePct += s.attendancePct;
+      totalPerformance += s.performanceAvg;
+      
+      totalFeeExpected += s.feeAmount;
+      if (s.feeStatus === 'Paid') {
+        totalFeeCollected += s.feeAmount;
+      }
+    });
+
+    const absentCount = count - presentCount;
+    const avgAttendance = count > 0 ? Math.round(totalAttendancePct / count) : 0;
+    const avgPerformance = count > 0 ? Math.round(totalPerformance / count) : 0;
+    const feePct = totalFeeExpected > 0 ? Math.round((totalFeeCollected / totalFeeExpected) * 100) : 0;
+
+    let clsDetails = null;
+    let capacity = count;
+    if (selectedClassId !== 'ALL') {
+      clsDetails = initialClasses.find(c => c.id === selectedClassId);
+      capacity = clsDetails?.capacity || count;
+    } else {
+      capacity = initialClasses.reduce((acc, curr) => acc + curr.capacity, 0);
     }
 
-    const cls = initialClasses.find(c => c.id === selectedClassId) || initialClasses[0];
-    const filteredStudents = students.filter(s => s.classId === selectedClassId);
-    const count = filteredStudents.length || cls.studentCount;
-
-    const baseAttendance = cls.attendancePct || 92;
-    const presentCount = Math.round(count * (baseAttendance / 100));
-    const absentCount = count - presentCount;
-    const feeCol = (cls.feeCollectionPct * 0.058 * (dateRange === 'This Week' ? 0.3 : dateRange === 'This Month' ? 0.7 : 1.0)).toFixed(1);
-
-    const classOffset = selectedClassId.charCodeAt(0) % 5;
+    const scopeText = selectedClassId === 'ALL'
+      ? `Showing overall metrics (${count} Students | 86 Staff | 10 Classes)`
+      : `Showing Class ${selectedClassId} (${count} Students | Teacher: ${clsDetails?.teacher || 'N/A'})`;
 
     return {
-      isOverall: false,
-      scopeText: `Showing filtered data for Class ${selectedClassId} (${count} Students | Teacher: ${cls.teacher}) • [${rangeLabel}]`,
+      isOverall: selectedClassId === 'ALL',
+      scopeText,
       dateRange,
       kpis: {
-        totalStudents: `${count}`,
-        studentGrowth: `Capacity ${cls.capacity}`,
-        attendancePct: `${cls.attendancePct}%`,
+        totalStudents: count.toString(),
+        studentGrowth: `Capacity ${capacity}`,
+        attendancePct: `${avgAttendance}%`,
         attendanceBreakdown: `${presentCount} Present • ${absentCount} Absent`,
-        feeCollected: `₹${feeCol}L`,
-        feeExpected: `₹5.8L`,
-        feePct: `${cls.feeCollectionPct}%`,
-        academicAvg: `${cls.avgScore}%`,
-        academicGrowth: `Class Average`
+        feeCollected: `₹${(totalFeeCollected / 100000).toFixed(2)}L`,
+        feeExpected: `₹${(totalFeeExpected / 100000).toFixed(2)}L`,
+        feePct: `${feePct}%`,
+        academicAvg: `${avgPerformance}%`,
+        academicGrowth: selectedClassId === 'ALL' ? '+3.2% Overall' : 'Class Average'
       },
       students: filteredStudents,
-      classDetails: cls,
+      classDetails: clsDetails,
       attendanceChartData: [
-        { day: 'Mon', Present: Math.min(count, presentCount - classOffset), Absent: Math.max(0, absentCount + classOffset) },
-        { day: 'Tue', Present: Math.min(count, presentCount + 1), Absent: Math.max(0, absentCount - 1) },
-        { day: 'Wed', Present: Math.min(count, presentCount - 2), Absent: Math.max(0, absentCount + 2) },
-        { day: 'Thu', Present: Math.min(count, presentCount + 2), Absent: Math.max(0, absentCount - 2) },
-        { day: 'Fri', Present: Math.min(count, presentCount - 1), Absent: Math.max(0, absentCount + 1) },
-        { day: 'Sat', Present: Math.min(count, presentCount - 3), Absent: Math.max(0, absentCount + 3) },
+        { day: 'Mon', Present: Math.round(presentCount * 0.95), Absent: count - Math.round(presentCount * 0.95) },
+        { day: 'Tue', Present: presentCount, Absent: absentCount },
+        { day: 'Wed', Present: Math.round(presentCount * 0.98), Absent: count - Math.round(presentCount * 0.98) },
+        { day: 'Thu', Present: Math.round(presentCount * 1.02) > count ? count : Math.round(presentCount * 1.02), Absent: Math.max(0, count - Math.round(presentCount * 1.02)) },
+        { day: 'Fri', Present: Math.round(presentCount * 0.9), Absent: count - Math.round(presentCount * 0.9) },
       ],
       feeMonthlyData: [
-        { month: 'Apr', Collected: Number((0.8 + classOffset * 0.1).toFixed(1)) },
-        { month: 'May', Collected: Number((1.2 + classOffset * 0.1).toFixed(1)) },
-        { month: 'Jun', Collected: Number((0.9 + classOffset * 0.1).toFixed(1)) },
-        { month: 'Jul', Collected: Number((1.1 + classOffset * 0.1).toFixed(1)) },
-        { month: 'Aug', Collected: Number((0.7 + classOffset * 0.1).toFixed(1)) },
+        { month: 'Apr', Collected: totalFeeCollected * 0.15 / 100000 },
+        { month: 'May', Collected: totalFeeCollected * 0.30 / 100000 },
+        { month: 'Jun', Collected: totalFeeCollected * 0.20 / 100000 },
+        { month: 'Jul', Collected: totalFeeCollected * 0.25 / 100000 },
+        { month: 'Aug', Collected: totalFeeCollected * 0.10 / 100000 },
       ],
-      subjectPerformanceData: [
-        { subject: 'Maths', score: Math.min(100, cls.avgScore + (classOffset - 2) * 3) },
-        { subject: 'Science', score: Math.min(100, cls.avgScore - (classOffset - 1) * 2) },
-        { subject: 'English', score: Math.min(100, cls.avgScore + 5) },
-        { subject: 'Comp Sci', score: Math.min(100, cls.avgScore + 8) },
-        { subject: 'Social Studies', score: Math.min(100, cls.avgScore - 4) },
-      ]
+      subjectPerformanceData: (function() {
+        const classSubjects = {
+          '11-Science': ['Mathematics', 'English', 'Physics', 'Chemistry', 'Biology', 'Computer Science', 'Physical Education'],
+          '12-Science': ['Mathematics', 'English', 'Physics', 'Chemistry', 'Biology', 'Computer Science', 'Physical Education'],
+          '11-Commerce': ['Accountancy', 'Economics', 'Business Studies', 'English', 'Mathematics', 'Computer Science', 'Physical Education'],
+          '12-Commerce': ['Accountancy', 'Economics', 'Business Studies', 'English', 'Mathematics', 'Computer Science', 'Physical Education']
+        };
+        let subs = classSubjects[selectedClassId] || ['Mathematics', 'English', 'Science', 'Social Studies', 'Computer Science', 'Hindi', 'Gujarati'];
+        if (selectedClassId === 'ALL') {
+            subs = ['Mathematics', 'English', 'Science', 'Computer Science', 'Physics', 'Economics', 'Accountancy'];
+        }
+        return subs.map((sub, idx) => ({
+            subject: sub,
+            score: Math.min(100, Math.max(40, avgPerformance + (idx % 2 === 0 ? 5 : -4) + (idx * 2) - 3))
+        }));
+      })()
     };
   };
 
