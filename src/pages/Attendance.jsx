@@ -4,7 +4,7 @@ import { useFilter } from '../context/FilterContext';
 import ClassSelector from '../components/common/ClassSelector';
 import StudentDrawer from '../components/common/StudentDrawer';
 import { 
-  ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, 
+  ResponsiveContainer, AreaChart, Area, BarChart, Bar, Cell, XAxis, YAxis, 
   Tooltip, CartesianGrid, Legend 
 } from 'recharts';
 import { 
@@ -55,7 +55,8 @@ export default function Attendance() {
       ? Math.round(clsStudents.reduce((acc, curr) => acc + curr.attendancePct, 0) / clsStudents.length)
       : 0;
     return { 
-      name: cls.name, 
+      id: cls.id,
+      name: cls.id, 
       Attendance: avgAtt,
       studentsCount: clsStudents.length
     };
@@ -216,15 +217,24 @@ export default function Attendance() {
 
           <div className="h-64 w-full text-xs">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={classComparisonData}>
+              <BarChart data={classComparisonData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                <XAxis dataKey="name" stroke="#64748B" tickLine={false} />
-                <YAxis domain={[60, 100]} stroke="#64748B" tickLine={false} />
+                <XAxis dataKey="name" stroke="#64748B" tickLine={false} interval={0} fontSize={11} />
+                <YAxis domain={[50, 100]} stroke="#64748B" tickLine={false} fontSize={11} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#0F172A', borderRadius: '12px', border: 'none', color: '#fff', fontSize: '12px' }}
                   itemStyle={{ color: '#60A5FA' }}
+                  formatter={(val) => [`${val}%`, 'Attendance']}
+                  labelFormatter={(label) => `Class ${label}`}
                 />
-                <Bar dataKey="Attendance" fill="#2563EB" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="Attendance" radius={[6, 6, 0, 0]}>
+                  {classComparisonData.map((entry) => (
+                    <Cell 
+                      key={entry.id} 
+                      fill={selectedClassId === 'ALL' || selectedClassId === entry.id ? '#2563EB' : '#CBD5E1'} 
+                    />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
